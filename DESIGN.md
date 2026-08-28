@@ -86,8 +86,10 @@
 
 ## ③ Typography Rules
 
-- **폰트 패밀리**: 프로젝트에 이미 설정된 `Geist Sans`(본문/제목), `Geist Mono`(코드·숫자 데이터 강조, 예: 연속 기록 일수)를 그대로 사용합니다.
-- **Fallback**: `Geist Sans, ui-sans-serif, system-ui, sans-serif`
+- **폰트 패밀리**: 본문/제목은 `Geist Sans` + `Noto Sans KR` 조합, 숫자·통계 강조는 `Geist Mono`(예: 연속 기록 일수)를 사용합니다.
+- **Fallback**: `Geist Sans, Noto Sans KR, ui-sans-serif, system-ui, sans-serif`
+
+> **왜 두 개인가**: Geist에는 한글 글리프가 없습니다(지원 subset이 latin·cyrillic·vietnamese 계열뿐). 폰트 폴백은 글리프 단위로 동작하므로, 이 순서를 두면 **영문·숫자는 Geist가, 한글은 Noto Sans KR이** 담당합니다. Geist만 지정하면 한글이 시스템 기본 폰트로 떨어져 화면마다 다르게 보입니다.
 
 | 레벨 | 크기 | 굵기 | line-height | 용도 |
 |---|---|---|---|---|
@@ -241,7 +243,7 @@ action.primary #90CAF9 (hover #2196F3) / action.secondary #0D47A1 / action.disab
 border.default #757575 / border.focus #2196F3
 
 Success #2E7D32 / Warning #F9A825 / Danger #C62828 (다크 변형 TBD)
-폰트: Geist Sans(본문) / Geist Mono(숫자·통계)
+폰트: Geist Sans + Noto Sans KR(본문) / Geist Mono(숫자·통계)
 Radius: 버튼 8px / 카드 12px / 배지 999px(pill)
 Spacing base: 4px
 ```
