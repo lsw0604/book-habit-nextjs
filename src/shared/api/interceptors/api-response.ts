@@ -28,6 +28,24 @@ interface RetryableConfig extends InternalAxiosRequestConfig {
 
 let isRefreshing = false;
 
+/**
+ * 갱신이 확정적으로 실패한 뒤에는 더 시도하지 않는다.
+ *
+ * 갱신 실패는 `finally`에서 `isRefreshing`을 즉시 풀기 때문에, 이 플래그가
+ * 없으면 조금 늦게 401을 받은 요청이 새 갱신을 또 시작한다. 세션이 만료된
+ * 화면에 진행 중인 요청이 많을수록 실패할 갱신이 그만큼 반복된다.
+ *
+ * 로그인 성공 등으로 세션이 다시 생기면 {@link resetAuthState}로 풀어준다.
+ * 세션 만료 시 전체 리로드를 한다면 모듈이 새로 로드되므로 자동으로 풀린다.
+ */
+let hasSessionExpired = false;
+
+/** 로그인 등으로 세션이 새로 생겼을 때 갱신 차단을 해제한다. */
+export const resetAuthState = () => {
+  hasSessionExpired = false;
+  isRefreshing = false;
+};
+
 let pendingQueue: Array<{
   resolve: () => void;
   reject: (error: unknown) => void;
@@ -57,6 +75,13 @@ export const setupApiResponseInterceptor = (
 ): number => {
   const { refreshFn, onRefreshFailed } = options;
 
+  /** 세션 종료를 확정하고 상위에 한 번만 알린다. */
+  const expireSession = (reason: string) => {
+    if (hasSessionExpired) return;
+    hasSessionExpired = true;
+    onRefreshFailed(reason);
+  };
+
   return instance.interceptors.response.use(
     (response) => response,
     async (error: AxiosError<ErrorDTO>) => {
@@ -66,16 +91,21 @@ export const setupApiResponseInterceptor = (
         return Promise.reject(error);
       }
 
+      // 이미 세션이 끝났다고 판정됐으면 갱신을 다시 시도하지 않는다.
+      if (hasSessionExpired) {
+        return Promise.reject(APIError.unauthorized(error));
+      }
+
       // 이미 갱신 후 재시도한 요청이 또 401이면 세션이 끝난 것으로 본다.
       if (originalRequest._retry) {
-        onRefreshFailed("Retry after refresh still returned 401");
+        expireSession("Retry after refresh still returned 401");
         return Promise.reject(APIError.unauthorized(error));
       }
 
       // 갱신 요청 자체가 401이면 재귀를 멈춘다.
       // (갱신은 별도 인스턴스로 나가므로 보통 여기 오지 않는 방어 코드다.)
       if (originalRequest.url === API_ENDPOINTS.AUTH.REFRESH) {
-        onRefreshFailed("Refresh API returned 401");
+        expireSession("Refresh API returned 401");
         return Promise.reject(APIError.unauthorized(error));
       }
 
@@ -94,7 +124,7 @@ export const setupApiResponseInterceptor = (
       } catch (refreshError) {
         const rejection = APIError.unauthorized(refreshError);
         flushQueue(rejection);
-        onRefreshFailed(
+        expireSession(
           isAxiosError(refreshError)
             ? `Refresh failed (${refreshError.response?.status ?? "no response"})`
             : "Refresh failed",
