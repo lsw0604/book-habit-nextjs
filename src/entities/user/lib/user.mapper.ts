@@ -1,7 +1,7 @@
 import { UserDTO } from "../api";
 import { User } from "../model";
 import { formatGender, formatProfile, formatProvider } from "./user.formatter";
-import { normalizedDate } from "@/shared/utils/date";
+import { normalizedDate } from "@/shared/lib";
 
 export const toUserViewModel = (dto: UserDTO): User => {
   const { profile, birthday, gender, provider, ...rest } = dto;
