@@ -20,9 +20,9 @@ CQRS(쓰기/읽기 분리) 원칙으로 명확히 고정한 **클린 FSD**를 �
    - **queryKey 교차 무효화**도 동일하게 적용한다: 한 feature의 뮤테이션이 다른 feature가
      소유한 조회 결과를 무효화해야 한다면, 그 **queryKey 팩토리**를 `entities`(또는 `shared`)로
      하향 이관해 양쪽이 그곳에서 import한다. feature가 다른 feature의 queryKey를 직접
-     참조하지 않는다. (예: 태그 자동완성은 규칙 1-2)에 따라 `features/tag-autocomplete`가
-     조회 함수·UI를 소유하지만, queryKey 팩토리는 `entities/tag/model`에 두어
-     `features/my-book-tag-manage`가 태그 생성 후 그곳을 통해 무효화한다.)
+     참조하지 않는다. (예: 태그 조회는 규칙 1-3)에 따라 `entities/tag`가 조회 함수와
+     queryKey 팩토리를 소유하고, `features/my-book-tag-manage`가 태그 생성 후
+     그곳을 통해 무효화한다.)
    - 검색류 feature가 공유하는 디바운스/URL 동기화 로직은 `shared/lib/use-debounced-query`로
      미리 승인한다 (신규 검색 feature마다 재구현하거나 서로 참조하지 않는다).
 4. **폴더 구조를 임의로 새로 만들지 않는다.** 기존 레이어/세그먼트 규칙 안에서만 배치하고,
@@ -64,6 +64,9 @@ GET  /books/detail/{isbn}     식별자(isbn) 조회  → entities/book/api/get-
 POST /my-book                 쓰기(대조군)       → features/my-book-create/api/create-my-book.ts
 ```
 `features/search-book`이 검색 결과를 렌더링할 때는 `entities/book/ui/book-card.tsx`를 하향 참조해 재사용한다.
+
+> 명세의 54개 오퍼레이션에 이 절차를 적용한 결과는 `docs/api-mapping.md`에 있다.
+> 규칙이 원본이고 그 표는 파생물이므로, 어긋나면 규칙이 이긴다.
 
 > 여러 entity를 조합하는 복합 조회(예: 대시보드)는 특정 entity에 억지로 넣지 말고
 > `widgets` 또는 `views`에 둔다.
