@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ApiProvider } from "./_providers/api-provider";
+import { ApiProvider, QueryProvider } from "./_providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +25,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ApiProvider>{children}</ApiProvider>
+        {/* ApiProvider가 세션 만료 시 queryClient.clear()를 호출하므로
+            QueryProvider 안쪽에 있어야 한다. */}
+        <QueryProvider>
+          <ApiProvider>{children}</ApiProvider>
+        </QueryProvider>
       </body>
     </html>
   );

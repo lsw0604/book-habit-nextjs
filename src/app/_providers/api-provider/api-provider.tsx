@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
@@ -14,25 +15,10 @@ import {
 const LOGIN_PATH = "/login";
 
 /**
- * 세션이 끝났을 때 비워야 하는 클라이언트 상태를 한곳에 모은다.
- *
- * 전체 리로드 대신 `router.replace`를 쓰므로 클라이언트 상태가 그대로
- * 살아남는다. 이전 사용자 데이터가 남지 않게 하려면 여기에서 전부 비워야
- * 하고, **클라이언트 상태가 늘 때마다 이 함수에 추가해야 한다.** 빠뜨리면
- * 로그아웃된 화면에 이전 데이터가 보이는 버그가 조용히 생긴다.
- *
- * TanStack Query를 도입하면 `queryClient.clear()`가 여기 들어간다.
- * 지금은 서버 상태 캐시가 없어 `resetAuthState()`만으로 충분하다.
- */
-const clearClientSession = () => {
-  resetAuthState();
-};
-
-/**
  * 세션 만료 처리기를 담아두는 자리.
  *
- * 인터셉터는 모듈 로드 시점에 한 번만 등록하는데, 그때는 `router`가 없다.
- * 실제 처리는 마운트 후 {@link ApiProvider}가 여기에 채워 넣는다.
+ * 인터셉터는 모듈 로드 시점에 한 번만 등록하는데, 그때는 `router`도
+ * `queryClient`도 없다. 실제 처리는 마운트 후 {@link ApiProvider}가 채워 넣는다.
  */
 const sessionExpiredHandler: { current: (() => void) | null } = {
   current: null,
@@ -59,8 +45,21 @@ if (typeof window !== "undefined") {
 /** `apiClient`의 401 자동 갱신이 실패했을 때 로그인 화면으로 보낸다. */
 export function ApiProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
+    /**
+     * 세션이 끝났을 때 비워야 하는 클라이언트 상태를 한곳에 모은다.
+     *
+     * 전체 리로드가 아니라 `router.replace`를 쓰므로 클라이언트 상태가 그대로
+     * 살아남는다. 이전 사용자 데이터가 남지 않게 하려면 여기에서 전부 비워야
+     * 하고, **클라이언트 상태가 늘 때마다 여기에 추가해야 한다.**
+     */
+    const clearClientSession = () => {
+      queryClient.clear();
+      resetAuthState();
+    };
+
     // 현재 경로는 `usePathname`/`useSearchParams`로 읽지 않는다.
     // 프리렌더된 라우트에서 `useSearchParams`를 쓰면 가장 가까운 Suspense
     // 경계까지가 클라이언트 렌더링으로 떨어지는데, 루트에는 그 경계가 없어
@@ -81,7 +80,7 @@ export function ApiProvider({ children }: { children: ReactNode }) {
     return () => {
       sessionExpiredHandler.current = null;
     };
-  }, [router]);
+  }, [router, queryClient]);
 
   return <>{children}</>;
 }
