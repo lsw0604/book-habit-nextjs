@@ -1,26 +1,182 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
+/*
+ * DESIGN.md의 시맨틱 토큰을 shadcn 변수 슬롯에 대응시킨다.
+ * 이름 체계를 둘로 유지하면 반드시 갈라지므로 shadcn 이름 하나만 쓰고
+ * 대응 관계를 주석으로 남긴다. 값은 DESIGN.md의 HEX 그대로 적어
+ * 문서와 눈으로 대조할 수 있게 했다.
+ */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Geist에는 한글 글리프가 없다. 폰트 폴백은 글리프 단위라 한글만 Noto가 받는다. */
+  --font-sans: var(--font-geist-sans), var(--font-noto-sans-kr), ui-sans-serif,
+    system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+
+  /* DESIGN.md에 있으나 shadcn에 대응 슬롯이 없는 토큰 */
+  --color-title: var(--title);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Light — DESIGN.md ② Light Theme */
+:root {
+  --background: #ffffff; /* background.primary */
+  --foreground: #333333; /* text.primary */
+  --title: #0d47a1; /* text.title */
+
+  --card: #e3f2fd; /* background.surface */
+  --card-foreground: #333333;
+  --popover: #ffffff;
+  --popover-foreground: #333333;
+
+  --primary: #2196f3; /* action.primary */
+  --primary-foreground: #ffffff; /* text.inverse */
+  --secondary: #90caf9; /* action.secondary */
+  --secondary-foreground: #0d47a1; /* 배지 텍스트 = text.title */
+
+  --muted: #f5f5f5; /* background.subtle */
+  --muted-foreground: #757575; /* text.secondary */
+  --accent: #e3f2fd; /* hover 배경 = background.surface */
+  --accent-foreground: #0d47a1;
+
+  --success: #2e7d32;
+  --warning: #f9a825;
+  --destructive: #c62828; /* Danger */
+
+  --border: #e0e0e0; /* border.default */
+  --input: #e0e0e0;
+  --ring: #90caf9; /* border.focus */
+
+  /*
+   * DESIGN.md는 버튼 8px / 카드 12px를 요구하는데 shadcn은 --radius 하나에서
+   * 스케일을 파생시킨다. 8px을 기준으로 잡으면
+   * rounded-lg = 8px(버튼), rounded-xl = 11.2px(카드 ≈ 12px)로 맞아떨어진다.
+   * 배지는 rounded-full이라 이 스케일과 무관하다.
+   */
+  --radius: 0.5rem;
+
+  --chart-1: #2196f3;
+  --chart-2: #90caf9;
+  --chart-3: #0d47a1;
+  --chart-4: #757575;
+  --chart-5: #e0e0e0;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #333333;
+  --sidebar-primary: #2196f3;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3f2fd;
+  --sidebar-accent-foreground: #0d47a1;
+  --sidebar-border: #e0e0e0;
+  --sidebar-ring: #90caf9;
+}
+
+/* Dark — DESIGN.md ② Dark Theme */
+.dark {
+  --background: #121418; /* darkScale.bg */
+  --foreground: #e0e0e0; /* text.primary */
+  --title: #e3f2fd; /* text.title */
+
+  --card: #1e232b; /* darkScale.surface */
+  --card-foreground: #e0e0e0;
+  --popover: #1e232b;
+  --popover-foreground: #e0e0e0;
+
+  /* 다크에서 action.primary는 옅은 블루라 그 위 텍스트는 반드시 어두운 색이다. */
+  --primary: #90caf9;
+  --primary-foreground: #121418; /* text.inverse */
+  --secondary: #0d47a1;
+  --secondary-foreground: #e3f2fd;
+
+  /*
+   * DESIGN.md의 background.subtle 다크값은 blue.900(#0D47A1)이지만 여기 쓰지 않는다.
+   * shadcn에서 muted는 비활성 배경·스켈레톤처럼 **뒤로 물러나야 하는** 자리인데
+   * 채도 높은 파랑을 넣으면 역할이 반대가 된다. 라이트의 gray100이 중립으로
+   * 물러나는 것과도 비대칭이다. 같은 계열의 서피스 색을 써서 대칭을 맞춘다.
+   * blue.900은 --secondary로 이미 노출돼 있어 잃는 값도 없다.
+   */
+  --muted: #1e232b; /* darkScale.surface */
+  --muted-foreground: #757575;
+  --accent: #1e232b;
+  --accent-foreground: #e3f2fd;
+
+  --success: #66bb6a;
+  --warning: #ffca28;
+  --destructive: #ef5350;
+
+  --border: #757575;
+  --input: #757575;
+  --ring: #2196f3; /* border.focus */
+
+  --chart-1: #90caf9;
+  --chart-2: #2196f3;
+  --chart-3: #e3f2fd;
+  --chart-4: #757575;
+  --chart-5: #0d47a1;
+
+  --sidebar: #1e232b;
+  --sidebar-foreground: #e0e0e0;
+  --sidebar-primary: #90caf9;
+  --sidebar-primary-foreground: #121418;
+  --sidebar-accent: #0d47a1;
+  --sidebar-accent-foreground: #e3f2fd;
+  --sidebar-border: #757575;
+  --sidebar-ring: #2196f3;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
