@@ -24,6 +24,8 @@
   --color-title: var(--title);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-primary-hover: var(--primary-hover); /* action.primaryHover */
+  --color-disabled: var(--disabled); /* action.disabled */
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -76,6 +78,8 @@
 
   --primary: #2196f3; /* action.primary */
   --primary-foreground: #ffffff; /* text.inverse */
+  --primary-hover: #0d47a1; /* action.primaryHover */
+  --disabled: #e0e0e0; /* action.disabled */
   --secondary: #90caf9; /* action.secondary */
   --secondary-foreground: #0d47a1; /* 배지 텍스트 = text.title */
 
@@ -130,6 +134,8 @@
   /* 다크에서 action.primary는 옅은 블루라 그 위 텍스트는 반드시 어두운 색이다. */
   --primary: #90caf9;
   --primary-foreground: #121418; /* text.inverse */
+  --primary-hover: #2196f3; /* action.primaryHover */
+  --disabled: #757575; /* action.disabled */
   --secondary: #0d47a1;
   --secondary-foreground: #e3f2fd;
 
