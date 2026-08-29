@@ -15,6 +15,7 @@ import {
 import { useLoginForm } from "../hooks";
 import { LoginType } from "../model";
 import Link from "next/link";
+import { KakaoLoginButton } from "./kakao-login-button";
 
 export function LoginForm() {
   const {
@@ -100,6 +101,7 @@ function LoginFooter() {
       <Button variant="default" type="submit" className="mt-4 w-full">
         로그인
       </Button>
+      <KakaoLoginButton />
     </footer>
   );
 }
