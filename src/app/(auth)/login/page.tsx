@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { LoginForm } from "@/features/login";
+import { LoginView } from "@/views/login-view";
 
 export const metadata: Metadata = {
   title: "로그인 · book-habit",
@@ -12,5 +12,5 @@ export const metadata: Metadata = {
  * `LoginForm`이 그때 `window.location`에서 읽고 안전한 경로로 좁힌다.
  */
 export default function LoginPage() {
-  return <LoginForm />;
+  return <LoginView />;
 }
