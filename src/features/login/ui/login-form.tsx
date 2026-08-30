@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { type Control, Controller } from "react-hook-form";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 import {
@@ -14,7 +15,6 @@ import {
 
 import { useLoginForm } from "../hooks";
 import { LoginType } from "../model";
-import Link from "next/link";
 import { KakaoLoginButton } from "./kakao-login-button";
 
 export function LoginForm() {
@@ -29,6 +29,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+      <KakaoLoginError />
       <FieldGroup>
         <EmailField control={control} />
         <PasswordField control={control} />
@@ -46,6 +47,31 @@ export function LoginForm() {
       <Separator className="my-4" />
       <LoginFooter />
     </form>
+  );
+}
+
+const noopSubscribe = () => () => {};
+
+/**
+ * 백엔드가 카카오 콜백에서 CSRF state 불일치 등으로 실패하면 `?error=`를
+ * 붙여 여기로 돌려보낸다. `useSearchParams`를 쓰면 이 페이지가 동적
+ * 렌더링으로 바뀌므로, `redirectTo`와 같은 방식으로 `window.location`에서
+ * 직접 읽는다. 서버 스냅샷은 항상 false라 하이드레이션 불일치가 없고,
+ * 클라이언트 값은 커밋 이후에 반영된다.
+ */
+function KakaoLoginError() {
+  const hasError = useSyncExternalStore(
+    noopSubscribe,
+    () => new URLSearchParams(window.location.search).has("error"),
+    () => false,
+  );
+
+  if (!hasError) return null;
+
+  return (
+    <FieldError className="mb-4">
+      카카오 로그인에 실패했어요. 다시 시도해주세요.
+    </FieldError>
   );
 }
 
@@ -97,8 +123,8 @@ function PasswordField({ control }: { control: Control<LoginType> }) {
 
 function LoginFooter() {
   return (
-    <footer>
-      <Button variant="default" type="submit" className="mt-4 w-full">
+    <footer className="mt-4 flex flex-col gap-2">
+      <Button variant="default" type="submit" className="w-full">
         로그인
       </Button>
       <KakaoLoginButton />

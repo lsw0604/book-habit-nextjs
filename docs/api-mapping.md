@@ -9,7 +9,7 @@
 2. `GET`인데 **필수** 파라미터가 자유 텍스트 검색어 → `features`
 3. 그 외 모든 `GET` → `entities`
 
-결과: features 31 / entities 23.
+결과: features 30 / entities 23 (+ 카카오 OAuth 2개는 판정 대상이 아님 — 아래 예외 참조).
 
 ---
 
@@ -19,7 +19,8 @@
 |---|---|---|---|
 | POST | `/api/auth/signup` | 1 | `features/auth-signup` |
 | POST | `/api/auth/login` | 1 | `features/auth-login` |
-| POST | `/api/auth/kakao/callback` | 1 | `features/auth-kakao-login` |
+| GET | `/api/auth/kakao` | — | `features/login`(아래 예외 참조) |
+| GET | `/api/auth/kakao/callback` | — | FE에서 호출하지 않음(아래 예외 참조) |
 | POST | `/api/auth/logout` | 1 | `features/auth-logout` |
 | POST | `/api/auth/refresh` | 1 | **`shared/api`** (아래 예외 참조) |
 | GET | `/api/auth/me` | 3 | `entities/user` |
@@ -133,6 +134,14 @@
 ---
 
 ## 예외와 판단이 필요한 지점
+
+**`GET /api/auth/kakao`·`GET /api/auth/kakao/callback`는 API 클라이언트로 호출하지 않는다.**
+백엔드가 인가 URL 빌드·state 쿠키 발급·code 교환·세션 쿠키 발급을 전부 소유하고
+브라우저 302 리다이렉트로 왕복한다. FE는 `/api/auth/kakao`로 향하는 `<a>` 링크
+하나만 `features/login/ui/kakao-login-button.tsx`에 둔다 — `axios`/TanStack Query를
+거치지 않는 순수 네비게이션이라 `api/`·`model/` 세그먼트가 필요 없고, 판정 규칙(1~3)도
+애초에 적용 대상이 아니다. 콜백 경로는 카카오→백엔드 간에만 오가고 FE 코드가 직접
+참조하지 않는다.
 
 **`POST /api/auth/refresh`는 `shared/api`에 있다.** 규칙 1대로면 feature지만, 401을 받은
 인터셉터가 스스로 호출해야 하고 `shared`는 `features`를 import할 수 없다. 인프라 계층의

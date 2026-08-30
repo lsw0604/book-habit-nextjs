@@ -1,11 +1,10 @@
 import { API_ENDPOINTS, authClient } from "@/shared/api";
 import type { AccessDTO } from "@/entities/user";
 
-import type { KakaoLoginRequestDTO, LoginRequestDTO } from "./login.dto";
+import type { LoginRequestDTO } from "./login.dto";
 
 export interface LoginService {
   login: (body: LoginRequestDTO) => Promise<AccessDTO>;
-  kakaoLogin: (body: KakaoLoginRequestDTO) => Promise<AccessDTO>;
 }
 
 /**
@@ -17,10 +16,4 @@ export interface LoginService {
 export const loginService: LoginService = {
   login: (body) =>
     authClient.post<AccessDTO, LoginRequestDTO>(API_ENDPOINTS.AUTH.LOGIN, body),
-
-  kakaoLogin: (body) =>
-    authClient.post<AccessDTO, KakaoLoginRequestDTO>(
-      API_ENDPOINTS.AUTH.KAKAO_CALLBACK,
-      body,
-    ),
 };

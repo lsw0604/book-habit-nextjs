@@ -7,7 +7,8 @@ export const API_ENDPOINTS = {
   AUTH: {
     SIGNUP: "/api/auth/signup",
     LOGIN: "/api/auth/login",
-    KAKAO_CALLBACK: "/api/auth/kakao/callback",
+    /** 백엔드가 인가·콜백을 전부 소유한다. FE는 이 경로로 <a> 링크만 건다. */
+    KAKAO_AUTHORIZE: "/api/auth/kakao",
     REFRESH: "/api/auth/refresh",
     ME: "/api/auth/me",
     LOGOUT: "/api/auth/logout",
