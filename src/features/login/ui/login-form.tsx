@@ -43,7 +43,7 @@ export function LoginForm() {
       <FieldGroup>
         <EmailField control={control} />
         <PasswordField control={control} />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm leading-normal text-muted-foreground">
           혹시 계정이 없으신가요?{" "}
           <Link
             href="/register"
