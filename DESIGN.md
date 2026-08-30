@@ -1,272 +1,201 @@
-# DESIGN.md — book-habit-nextjs
+# DESIGN.md — book-habit
 
-> 이 문서는 **디자인 시스템 정본**이다. 제품 정의·타깃 사용자·기술 스택은 `AGENTS.md`를 따른다.
-> 컬러는 라이트/다크 모두 확정됐고, 타이포그래피·간격·elevation은 업계 표준(4/8px spacing, 4단계 elevation) 기준이다.
+> **시각 디자인 정본.** 제품 정의는 `AGENTS.md`, 레이어 규칙은 `docs/architecture.md`가 담당한다.
+> 이 문서의 모든 값은 `src/app/globals.css`에 CSS 변수로 구현되어 있다.
+> 각 표의 **CSS 변수 / 클래스** 열이 코드와의 계약이다. 컴포넌트는 HEX가 아니라 그 클래스를 쓴다.
+
+### 구현 현황 (2026-08-30)
+
+- **토큰**: 컬러·elevation·radius 전부 `globals.css`에 구현 완료.
+- **다크 테마**: 변수는 `.dark`에 정의됐지만 클래스를 붙이는 토글이 아직 없다 → 현재는 라이트만 렌더링된다. 그래도 신규 코드는 다크 대비를 항상 함께 검증한다.
+- **구현된 컴포넌트** (`src/shared/ui/`): Button, Input, Textarea, Checkbox, Switch, Label, Field, Separator, Avatar, Skeleton, Tooltip, Calendar.
+- **미구현**: Card, Badge, Toast, Modal, Progress, Streak Heatmap, Feed Item 등 → ④의 **신규 컴포넌트 파생 규칙**을 따라 만든다.
 
 ---
 
 ## ① Visual Theme & Atmosphere
 
-- **분위기**: Notion, Linear, Todoist와 같은 미니멀 생산성 도구 톤. 장식적 요소를 배제하고, 화이트/라이트 블루 서피스 위에 콘텐츠(책, 기록, 통계, 서평)가 또렷하게 드러나도록 구성합니다.
-- **밀도**: 화면 성격에 따라 밀도를 구분합니다. 대시보드(오늘의 기록·스트릭)는 여유로운(spacious) 레이아웃으로 핵심 지표를 크게, 서평/소셜 피드처럼 콘텐츠가 나열되는 화면은 Linear의 리스트 뷰처럼 컴팩트하게 구성합니다.
-- **디자인 철학**: "조용한 동기부여" — 화려한 게이미피케이션 대신 진행 상황을 담백하게 시각화(진행 바, 배지, 스트릭 표시)하고, 서평·노트 같은 텍스트 콘텐츠는 가독성을 최우선으로 합니다. 소셜 요소(팔로우, 공유, 좋아요)도 Notion의 댓글 UI처럼 절제된 형태로 녹입니다.
+- **톤**: Notion·Linear·Todoist 같은 미니멀 생산성 도구. 장식을 배제하고 화이트/라이트 블루 서피스 위에 콘텐츠(책·기록·통계·서평)만 또렷하게 남긴다.
+- **밀도**: 대시보드(오늘의 기록·스트릭)는 여유롭게 지표를 크게, 서평·피드처럼 나열되는 화면은 Linear 리스트 뷰처럼 컴팩트하게.
+- **철학**: "조용한 동기부여" — 게이미피케이션 대신 진행 바·배지·스트릭으로 담백하게, 텍스트는 가독성 우선, 소셜 요소는 Notion 댓글 UI처럼 절제한다.
 
 ---
 
 ## ② Color Palette & Roles
 
-색상은 **base(원시값) → theme(라이트/다크 시맨틱 역할값)** 2단계 토큰 구조로 관리합니다. 컴포넌트는 항상 시맨틱 토큰(예: `action.primary`)을 참조하고, base HEX를 직접 하드코딩하지 않습니다.
+**Base 원시값** — 컴포넌트에서 직접 쓰지 않는다. 아래 시맨틱 표의 출처일 뿐이다.
 
-### Base Tokens
+```
+blue.50 #E3F2FD · blue.200 #90CAF9 · blue.500 #2196F3 · blue.900 #0D47A1
+darkScale.bg #121418 · darkScale.surface #1E232B
+gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
+```
 
-| 토큰                | HEX       | 비고                 |
-| ------------------- | --------- | -------------------- |
-| `blue.50`           | `#E3F2FD` | 가장 옅은 블루       |
-| `blue.200`          | `#90CAF9` | 옅은 블루            |
-| `blue.500`          | `#2196F3` | 브랜드 기본 블루     |
-| `blue.900`          | `#0D47A1` | 가장 진한 블루       |
-| `darkScale.bg`      | `#121418` | 다크모드 전용 배경   |
-| `darkScale.surface` | `#1E232B` | 다크모드 전용 서피스 |
-| `neutral.white`     | `#FFFFFF` |                      |
-| `neutral.black`     | `#000000` |                      |
-| `neutral.gray100`   | `#F5F5F5` |                      |
-| `neutral.gray300`   | `#E0E0E0` |                      |
-| `neutral.gray500`   | `#757575` |                      |
-| `neutral.gray800`   | `#333333` |                      |
+**시맨틱 토큰 ↔ 코드** — 이 표가 정본이다.
 
-### Light Theme (시맨틱 토큰)
+| 역할                  | CSS 변수                        | Tailwind 클래스                        | Light     | Dark      |
+| --------------------- | ------------------------------- | -------------------------------------- | --------- | --------- |
+| 배경(기본)            | `--background`                  | `bg-background`                        | `#FFFFFF` | `#121418` |
+| 배경(서피스/카드)     | `--card` · `--accent`           | `bg-card` · `hover:bg-accent`          | `#E3F2FD` | `#1E232B` |
+| 배경(옅은 구획)       | `--muted`                       | `bg-muted`                             | `#F5F5F5` | `#1E232B` |
+| 텍스트(타이틀)        | `--title`                       | `text-title`                           | `#0D47A1` | `#E3F2FD` |
+| 텍스트(본문)          | `--foreground`                  | `text-foreground`                      | `#333333` | `#E0E0E0` |
+| 텍스트(보조)          | `--muted-foreground`            | `text-muted-foreground`                | `#757575` | `#757575` |
+| 텍스트(반전, 버튼 위) | `--primary-foreground`          | `text-primary-foreground`              | `#FFFFFF` | `#121418` |
+| 액션(기본)            | `--primary`                     | `bg-primary` · `text-primary`          | `#2196F3` | `#90CAF9` |
+| 액션(hover)           | `--primary-hover`               | `hover:bg-primary-hover`               | `#0D47A1` | `#2196F3` |
+| 액션(보조)            | `--secondary`                   | `bg-secondary`                         | `#90CAF9` | `#0D47A1` |
+| 액션(비활성)          | `--disabled`                    | `disabled:bg-disabled`                 | `#E0E0E0` | `#757575` |
+| 보더(기본)            | `--border` · `--input`          | `border-border` · `border-input`       | `#E0E0E0` | `#757575` |
+| 보더/링(포커스)       | `--ring`                        | `focus-visible:border-ring` `ring-ring`| `#90CAF9` | `#2196F3` |
 
-| 역할                  | 토큰                  | 참조              | HEX       |
-| --------------------- | --------------------- | ----------------- | --------- |
-| 배경(기본)            | `background.primary`  | `neutral.white`   | `#FFFFFF` |
-| 배경(서피스/카드)     | `background.surface`  | `blue.50`         | `#E3F2FD` |
-| 배경(옅은 구획)       | `background.subtle`   | `neutral.gray100` | `#F5F5F5` |
-| 텍스트(타이틀)        | `text.title`          | `blue.900`        | `#0D47A1` |
-| 텍스트(본문)          | `text.primary`        | `neutral.gray800` | `#333333` |
-| 텍스트(보조)          | `text.secondary`      | `neutral.gray500` | `#757575` |
-| 텍스트(반전, 버튼 위) | `text.inverse`        | `neutral.white`   | `#FFFFFF` |
-| 액션(기본)            | `action.primary`      | `blue.500`        | `#2196F3` |
-| 액션(hover)           | `action.primaryHover` | `blue.900`        | `#0D47A1` |
-| 액션(보조)            | `action.secondary`    | `blue.200`        | `#90CAF9` |
-| 액션(비활성)          | `action.disabled`     | `neutral.gray300` | `#E0E0E0` |
-| 보더(기본)            | `border.default`      | `neutral.gray300` | `#E0E0E0` |
-| 보더(포커스)          | `border.focus`        | `blue.200`        | `#90CAF9` |
+**상태색 (Success / Warning / Danger)** — 스트릭·목표·폼 검증 전용.
 
-### Dark Theme (시맨틱 토큰)
+| 역할    | CSS 변수        | Tailwind 클래스                        | Light     | Dark      |
+| ------- | --------------- | -------------------------------------- | --------- | --------- |
+| Success | `--success`     | `text-success` · `bg-success`          | `#2E7D32` | `#66BB6A` |
+| Warning | `--warning`     | `text-warning` · `bg-warning`          | `#F9A825` | `#FFCA28` |
+| Danger  | `--destructive` | `text-destructive` · `bg-destructive`  | `#C62828` | `#EF5350` |
 
-| 역할                  | 토큰                  | 참조                | HEX       |
-| --------------------- | --------------------- | ------------------- | --------- |
-| 배경(기본)            | `background.primary`  | `darkScale.bg`      | `#121418` |
-| 배경(서피스/카드)     | `background.surface`  | `darkScale.surface` | `#1E232B` |
-| 배경(옅은 구획)       | `background.subtle`   | `blue.900`          | `#0D47A1` |
-| 텍스트(타이틀)        | `text.title`          | `blue.50`           | `#E3F2FD` |
-| 텍스트(본문)          | `text.primary`        | `neutral.gray300`   | `#E0E0E0` |
-| 텍스트(보조)          | `text.secondary`      | `neutral.gray500`   | `#757575` |
-| 텍스트(반전, 버튼 위) | `text.inverse`        | `darkScale.bg`      | `#121418` |
-| 액션(기본)            | `action.primary`      | `blue.200`          | `#90CAF9` |
-| 액션(hover)           | `action.primaryHover` | `blue.500`          | `#2196F3` |
-| 액션(보조)            | `action.secondary`    | `blue.900`          | `#0D47A1` |
-| 액션(비활성)          | `action.disabled`     | `neutral.gray500`   | `#757575` |
-| 보더(기본)            | `border.default`      | `neutral.gray500`   | `#757575` |
-| 보더(포커스)          | `border.focus`        | `blue.500`          | `#2196F3` |
+**차트**: `--chart-1`~`--chart-5`가 블루 계열 + 중립으로 정의돼 있다(`chart-1`이 가장 강조). 통계 화면은 이 순서대로 쓴다.
 
-> 다크모드에서는 `action.primary`가 옅은 블루(`#90CAF9`)이므로 버튼 텍스트는 반드시 `text.inverse`(`#121418`, 어두운 색)를 사용합니다. 라이트모드는 반대로 `action.primary`가 진한 블루라 `text.inverse`가 흰색입니다. **별도의 active(눌림) 토큰은 정의되어 있지 않으므로**, active 상태는 `action.primaryHover`와 동일한 값을 사용하거나 해당 값에 `opacity 85%`를 적용해 표현합니다.
-
-### Semantic (상태 표시 — 스트릭/목표)
-
-| 색상    | HEX (Light) | HEX (Dark) | 용도                              |
-| ------- | ----------- | ---------- | --------------------------------- |
-| Success | `#2E7D32`   | `#66BB6A`  | 목표 달성, 연속 기록(스트릭) 유지 |
-| Warning | `#F9A825`   | `#FFCA28`  | 목표 미달 임박, 스트릭 위험       |
-| Danger  | `#C62828`   | `#EF5350`  | 기록 끊김, 삭제/파괴적 액션       |
-
-> Success/Warning/Danger는 확정된 base/theme 토큰 세트에는 포함되어 있지 않아, `action.primary`가 라이트→다크에서 `blue.500`(진함) → `blue.200`(옅음)으로 두 단계 밝아지는 패턴과 동일한 논리로 다크 값을 도출했습니다(Material 800 계열 → 400 계열). `#121418` 배경 기준 대비비는 Success ≈ 7:1, Warning ≈ 12:1, Danger ≈ 6:1로 모두 AA 기준을 충분히 만족합니다.
+> 1. 다크에서 `--primary`는 **옅은** 블루라 그 위 텍스트는 반드시 `text-primary-foreground`(어두운 색)다.
+> 2. active(눌림) 토큰은 없다. `primary-hover`를 그대로 쓰거나 `opacity 85%`를 얹는다.
+> 3. `--muted` 다크값이 `blue.900`이 아닌 이유: muted는 스켈레톤·비활성처럼 **물러나는** 자리라 채도 높은 파랑이 역할을 뒤집는다. `blue.900`은 `--secondary`로 이미 노출돼 있다.
 
 ---
 
 ## ③ Typography Rules
 
-- **폰트 패밀리**: 본문/제목은 `Geist Sans` + `Noto Sans KR` 조합, 숫자·통계 강조는 `Geist Mono`(예: 연속 기록 일수)를 사용합니다.
-- **Fallback**: `Geist Sans, Noto Sans KR, ui-sans-serif, system-ui, sans-serif`
+`--font-sans` = `Geist Sans → Noto Sans KR → ui-sans-serif → system-ui`. Geist에 한글 글리프가 없고 폰트 폴백은 글리프 단위로 동작하므로 **영문·숫자는 Geist, 한글은 Noto**가 받는다 — 순서를 바꾸지 않는다. 숫자·통계는 `font-mono`(Geist Mono).
 
-> **왜 두 개인가**: Geist에는 한글 글리프가 없습니다(지원 subset이 latin·cyrillic·vietnamese 계열뿐). 폰트 폴백은 글리프 단위로 동작하므로, 이 순서를 두면 **영문·숫자는 Geist가, 한글은 Noto Sans KR이** 담당합니다. Geist만 지정하면 한글이 시스템 기본 폰트로 떨어져 화면마다 다르게 보입니다.
+| 레벨  | 크기 (모바일 / `md`↑) | 굵기 | line-height | Tailwind 클래스                                                    | 용도            |
+| ----- | --------------------- | ---- | ----------- | ------------------------------------------------------------------ | --------------- |
+| H1    | 28px / 32px           | 700  | 1.25        | `text-[1.75rem] md:text-[2rem] leading-tight font-bold tracking-[-0.01em]` | 페이지 타이틀   |
+| H2    | 20px / 24px           | 700  | 1.3         | `text-xl md:text-2xl leading-[1.3] font-bold tracking-[-0.01em]`   | 섹션 타이틀     |
+| H3    | 20px                  | 600  | 1.35        | `text-xl leading-[1.35] font-semibold`                             | 카드 제목       |
+| Body  | 16px                  | 400  | 1.6         | `text-base leading-[1.6]`                                          | 본문            |
+| Small | 14px                  | 400  | 1.5         | `text-sm leading-normal`                                           | 보조 설명, 캡션 |
+| Micro | 12px                  | 500  | 1.4         | `text-xs leading-[1.4] font-medium`                                | 배지, 타임스탬프|
+| Stat  | 24px / 28px           | 700  | 1.2         | `font-mono text-2xl md:text-[1.75rem] leading-[1.2] font-bold`     | 스트릭 일수, 통계 |
 
-| 레벨             | 크기            | 굵기             | line-height | 용도                      |
-| ---------------- | --------------- | ---------------- | ----------- | ------------------------- |
-| H1               | 32px / 2rem     | 700              | 1.25        | 페이지 타이틀             |
-| H2               | 24px / 1.5rem   | 700              | 1.3         | 섹션 타이틀               |
-| H3               | 20px / 1.25rem  | 600              | 1.35        | 카드 제목                 |
-| Body             | 16px / 1rem     | 400              | 1.6         | 본문 텍스트               |
-| Small            | 14px / 0.875rem | 400              | 1.5         | 보조 설명, 캡션           |
-| Micro            | 12px / 0.75rem  | 500              | 1.4         | 배지, 타임스탬프          |
-| Stat (숫자 강조) | 28px / 1.75rem  | 700 (Geist Mono) | 1.2         | 연속 기록 일수, 통계 수치 |
-
-- **letter-spacing**: 기본 `0`, H1/H2 등 큰 타이틀은 `-0.01em`로 살짝 좁혀 밀도감 부여.
-- 제목(H1~H3)은 `text.title` 토큰, 본문은 `text.primary`, 캡션/보조 설명은 `text.secondary` 토큰을 사용합니다.
+- letter-spacing은 기본 `0`, H1·H2만 `-0.01em`로 좁힌다.
+- Body/Small/Micro는 반응형으로 줄이지 않는다. 서평 본문은 `md:text-sm`으로 축소 금지 — 가독성이 ①의 원칙이다.
 
 ---
 
 ## ④ Component Stylings
 
-색상은 모두 시맨틱 토큰 기준으로 표기합니다 (라이트/다크 값은 ②번 표 참조).
+### Radius 스케일
 
-### Button (Primary)
+`--radius: 0.5rem`(8px)에서 파생된다. `rounded-lg`가 버튼 8px, `rounded-xl`(11.2px)이 카드 12px에 대응한다.
 
-- 기본: 배경 `action.primary`, 텍스트 `text.inverse`, `border-radius: 8px`, padding `10px 20px`
-- Hover: 배경 `action.primaryHover`
-- Active: `action.primaryHover`에 `opacity 85%` (별도 active 토큰 없음)
-- Disabled: 배경 `action.disabled`, 텍스트 `text.secondary`, cursor not-allowed
-- Focus: `2px solid border.focus` 아웃라인, offset 2px
+- `rounded-lg` 8px — 버튼 · 인풋 · 텍스트영역
+- `rounded-xl` ≈12px — 카드 · 노트/서평 카드 / `rounded-2xl` ≈16px — 모달
+- `rounded-[4px]` — 체크박스 · 책 표지 썸네일 / `rounded-full` — 배지 · 아바타 · 토글
 
-### Button (Secondary / Outline)
+### 구현된 컴포넌트
 
-- 기본: 배경 투명, 텍스트 `action.primary`, 테두리 `1px solid action.primary`
-- Hover: 배경 `background.surface`
+**Button** — `variant` × `size` 조합. 기본 padding `10px 20px`, Body 16px, `rounded-lg`. 모바일 터치 타깃 44×44px은 이 padding에서 충족된다.
 
-### Card
+| variant       | 기본                                | hover                     |
+| ------------- | ----------------------------------- | ------------------------- |
+| `default`     | `bg-primary text-primary-foreground`| `bg-primary-hover`        |
+| `outline`     | 투명 배경 + `border-primary text-primary` | `bg-accent`          |
+| `secondary`   | `bg-secondary text-secondary-foreground` | `bg-primary-hover`   |
+| `ghost`       | `text-primary`, 배경 없음           | `bg-accent`               |
+| `destructive` | `bg-destructive` — **삭제·파괴적 액션 전용** | `bg-destructive/85` |
+| `link`        | `text-primary`, 밑줄 오프셋 4px     | `underline`               |
 
-- 배경: `background.surface`
-- `border-radius: 12px`, `border: 1px solid border.default`
-- 내부 padding: `16px`(모바일) / `24px`(데스크톱)
+- size: `default`(px-5 py-2.5) · `sm`(px-4 py-2 text-sm) · `lg`(px-6 py-3) · `icon`(44×44) · `icon-sm`(36×36)
+- Focus: `ring-2 ring-ring` + `ring-offset-2`
+- Disabled: `bg-disabled text-muted-foreground cursor-not-allowed` (opacity로 죽이지 않는다)
+- Active: `translate-y-px`
 
-### Input
+**Input / Textarea** — padding `10px 12px`, Body 16px, `rounded-lg`, `border-input`.
 
-- 기본: `border: 1px solid border.default`, `border-radius: 8px`, padding `10px 12px`
-- Focus: `border-color: border.focus`, `box-shadow: 0 0 0 3px` (border.focus 색상, opacity 20%)
-- Error: `border-color: #C62828`(Danger), 하단에 동일 색 텍스트로 에러 메시지
+- Focus: `border-ring` + `ring-3 ring-ring/20` — 버튼의 2px 아웃라인과 **다르다**(규정이 서로 달라 일부러 다르게 뒀다)
+- Error: `aria-invalid`로 `border-destructive` + `ring-3 ring-destructive/20`, 하단에 `FieldError`(Small, `text-destructive`)
+- Disabled: `bg-disabled text-muted-foreground` / Textarea는 `field-sizing-content` + `min-h-16`
 
-### Badge (스트릭/뱃지 표시)
+| 컴포넌트    | 규격                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| `FormInput` | Label + Input + FieldError 조합. `id` 필수(라벨 연결 + `aria-describedby`). 아이콘 16px, 좌/우 배치. `onIconClick`을 주면 버튼으로 렌더링되고 `iconLabel`이 강제된다 |
+| `Checkbox`  | 16×16px, `rounded-[4px]`, `border-input`. 체크 시 `bg-primary` + 14px 체크 아이콘. 터치 여유는 `after:-inset-x-3 after:-inset-y-2` |
+| `Switch`    | 트랙 32×18.4px (`sm` 24×14px), `rounded-full`. off `bg-input` / on `bg-primary`. knob은 `bg-background` 원(16px, `sm` 12px) |
+| `Avatar`    | `sm` 24 · `default` 32 · `lg` 40px, `rounded-full`. 이미지 없으면 `bg-muted` 위 이니셜(Small, `text-muted-foreground`). `AvatarGroup`은 `-space-x-2` + `ring-2 ring-background` |
+| `Label`     | Small 14px `font-medium leading-none`                                                              |
+| `Separator` | `bg-border`, 1px                                                                                   |
+| `Skeleton`  | `bg-muted animate-pulse` (주기 1.5s)                                                               |
+| `Tooltip`   | `z-50`(= z-tooltip), 반전 배경 `bg-foreground` + 화살표                                            |
 
-- 배경 `action.secondary`, 텍스트 `text.title`, `border-radius: 999px`(pill), padding `4px 10px`, 폰트 Micro 스케일
+**예외 — 카카오 로그인 버튼**: ⑦의 "버튼은 블루 계열만" 규칙에서 유일하게 면제된다. 카카오 개발자 가이드가 배경 `#FEE500` · 텍스트 `rgba(0,0,0,.85)`를 요구하는 **서드파티 브랜드 규정**이기 때문이다. 이 예외를 다른 소셜 버튼으로 확장할 때도 같은 근거(공식 브랜드 가이드)가 있어야 한다.
 
-### Navigation (하단 탭 / 사이드바)
+### 신규 컴포넌트 파생 규칙
 
-- 비활성 아이콘·텍스트: `text.secondary`
-- 활성 아이콘·텍스트: `action.primary`, 상단에 2px 인디케이터 바(모바일 하단 탭 기준)
+아직 없는 컴포넌트(Card, Badge, Toast, Modal, Progress, Heatmap, Feed Item 등)를 만들 때는 새 값을 발명하지 말고 아래에서 조합한다.
 
-### Note / Review Card (서평·노트)
-
-- 배경: `background.primary`, `border: 1px solid border.default`, `border-radius: 12px`
-- 본문 텍스트는 Body 스케일(16px/1.6)로 가독성 우선, 인용구는 좌측 `4px solid action.secondary` 보더 + 이탤릭
-- 헤더에 책 표지 썸네일(48×64px, `border-radius: 4px`) + 책 제목/저자 메타(Small 스케일, `text.secondary`)
-
-### Social Feed Item (소셜/공유)
-
-- 기본: Card와 동일한 배경·보더, 상단에 사용자 아바타(32px, `border-radius: 999px`) + 닉네임 + 타임스탬프(Micro, `text.secondary`)
-- 액션 바(좋아요/댓글/공유): 아이콘 + 카운트, 비활성 `text.secondary` → 활성(좋아요 눌림) `action.primary`
-- hover 시 배경만 `background.surface`로 살짝 강조(그림자 추가 금지, elevation 1단계 유지)
-
-### Modal / Dialog
-
-- 오버레이: `neutral.black` opacity 40% (라이트/다크 공통), 클릭 시 닫힘
-- 모달 본체: 배경 `background.primary`, `border-radius: 16px`, elevation 4단계 그림자, max-width `480px`(모바일은 `calc(100vw - 32px)`)
-- 내부 padding: `24px`, 헤더(H3 타이틀 + 닫기 아이콘 버튼) / 본문 / 하단 액션 버튼 영역(우측 정렬, 버튼 간격 `space-sm`)
-- 진입/퇴장: opacity + scale(0.96→1) 트랜지션, 200ms ease-out
-
-### Toast / Snackbar
-
-- 배경 `background.surface`, 텍스트 `text.primary`, `border-radius: 8px`, elevation 2단계 그림자, padding `12px 16px`
-- 좌측에 상태 아이콘: 성공(Success 색), 에러(Danger 색), 일반 안내(`action.primary`)
-- 위치: 모바일은 화면 상단 고정(safe-area 여백 포함), 데스크톱은 우하단
-- 노출 시간: 기본 3초 후 자동 사라짐(opacity 트랜지션 200ms), 에러 토스트는 수동 닫기 전까지 유지
-
-### Checkbox / Toggle Switch
-
-- **Checkbox** (예: "오늘 읽음 체크"): 20×20px, 미체크 `border: 1px solid border.default`, 체크 시 배경 `action.primary` + 흰 체크 아이콘, `border-radius: 4px`
-- **Toggle** (예: 알림 on/off): 40×24px pill 트랙, off `background.subtle`, on `action.primary`, 손잡이(knob) 흰색 20px 원, 트랜지션 150ms ease
-
-### Progress Bar
-
-- 트랙: 높이 `8px`, `border-radius: 999px`, 배경 `background.subtle`
-- 채움: `action.primary`, 목표 달성 시(100%) `Success` 색으로 전환
-- 라벨(선택): 우측 또는 상단에 Small 스케일로 `x/y` 형식 텍스트(`text.secondary`)
-
-### Streak Calendar / Heatmap (GitHub 잔디 스타일)
-
-- 셀: 12×12px, `border-radius: 2px`, gap `2px`
-- 강도 4단계(기록 없음 → 많음), Success 색 기준 opacity로 표현:
-  - 기록 없음: `background.subtle`
-  - 1단계: Success opacity 30%
-  - 2단계: Success opacity 60%
-  - 3단계: Success opacity 100%
-- 오늘 날짜 셀: `border.focus` 1px 아웃라인으로 강조
-- hover 시 툴팁(날짜 + 기록 내용)을 Elevation 3단계로 표시
-
-### Empty State
-
-- 중앙 정렬, 아이콘 또는 일러스트(48~64px, `text.secondary` 톤) + 안내 문구(Body, `text.secondary`) + 선택적 CTA 버튼(Secondary 스타일)
-- 톤: 담백하게("아직 기록이 없어요" 정도), 과장된 카피나 캐릭터 일러스트는 지양 (Visual Theme의 "조용한 동기부여" 철학과 일치)
-
-### Avatar
-
-- 사이즈 스케일: `sm` 24px(리스트 내 인라인) · `md` 32px(피드, 댓글) · `lg` 64px(프로필 카드) · `xl` 96px(프로필 상세)
-- 공통: `border-radius: 999px`, 이미지 없을 경우 `action.secondary` 배경 위 이니셜(흰 텍스트, Small 스케일)
-
-### Book Cover Thumbnail — fallback
-
-- 커버 이미지가 없을 경우: `background.subtle` 배경 위에 책 아이콘(`text.secondary`, 사이즈의 40%)을 중앙 배치, 테두리는 기본 Note/Review Card 규격과 동일하게 유지
-- 이미지 로딩 중: 동일 비율의 skeleton(배경 `background.subtle`, opacity 펄스 애니메이션 1.5s)
-
-### Icon System
-
-- 라이브러리: Lucide (line 스타일, stroke-width 2px 통일)
-- 사이즈: `16px`(인라인 텍스트 옆) · `20px`(버튼·인풋 내부) · `24px`(내비게이션, 단독 아이콘 버튼)
-- 색상은 컨텍스트에 따라 `text.secondary`(기본) / `action.primary`(활성) / 상태색(Success/Warning/Danger) 중에서만 사용, 커스텀 컬러 아이콘 금지
+1. **배경** — 얹히는 서피스 `bg-card`, 물러나는 구획 `bg-muted`, 오버레이 본체 `bg-background`
+2. **테두리·반경** — `border border-border` + 위 Radius 스케일
+3. **그림자** — `shadow-elevation-{1..4}` 중 **하나만**: 카드 1 / 드롭다운·hover 2 / 팝오버·툴팁 3 / 모달 4
+4. **텍스트** — 제목 `text-title`, 본문 `text-foreground`, 메타 `text-muted-foreground`
+5. **강조** — 상태 표시만 Success/Warning/Danger, 나머지는 전부 `primary` 계열
+6. **패딩·z-index** — ⑤ 표의 값만. 카드 내부는 `p-4 md:p-6`
+7. 라이트/다크 두 테마 대비를 확인한 뒤 커밋한다
 
 ---
 
 ## ⑤ Layout Principles
 
-- **Base unit**: 4px. 모든 spacing은 4의 배수로 사용합니다.
+**Base unit 4px.** 모든 spacing은 4의 배수.
 
-| 토큰        | 값   | 용도                                             |
-| ----------- | ---- | ------------------------------------------------ |
-| `space-xs`  | 4px  | 아이콘-텍스트 간격                               |
-| `space-sm`  | 8px  | 인풋 내부 여백, 배지 padding                     |
-| `space-md`  | 16px | 카드 내부 padding(모바일), 컴포넌트 간 기본 간격 |
-| `space-lg`  | 24px | 섹션 내부 padding(데스크톱), 카드 간 간격        |
-| `space-xl`  | 40px | 섹션과 섹션 사이 간격                            |
-| `space-2xl` | 64px | 페이지 상단 여백, 큰 구획 분리                   |
+| 토큰        | 값   | Tailwind      | 용도                                    |
+| ----------- | ---- | ------------- | --------------------------------------- |
+| `space-xs`  | 4px  | `gap-1` `p-1` | 아이콘–텍스트 간격                      |
+| `space-sm`  | 8px  | `gap-2` `p-2` | 인풋 내부 여백, 배지 padding            |
+| `space-md`  | 16px | `gap-4` `p-4` | 카드 내부 padding(모바일), 컴포넌트 간격|
+| `space-lg`  | 24px | `gap-6` `p-6` | 섹션 padding(데스크톱), 카드 간 간격    |
+| `space-xl`  | 40px | `gap-10`      | 섹션과 섹션 사이                        |
+| `space-2xl` | 64px | `gap-16`      | 페이지 상단 여백, 큰 구획 분리          |
 
-- **컨테이너 최대 너비**: `1200px` (센터 정렬, 좌우 padding `16px`~`24px`)
-- **그리드**: 12-column, gutter `24px` (데스크톱) / `16px` (모바일)
-- **Safe area**: 모바일에서 하단 탭바·상단 고정 토스트는 `env(safe-area-inset-*)`를 padding에 반영 (노치/제스처 바 겹침 방지)
+- **컨테이너**: 최대 `1200px` 센터 정렬, 좌우 padding `16~24px`. 인증 화면처럼 좁은 폼은 `max-w-sm`.
+- **그리드**: 12-column, gutter `24px`(데스크톱) / `16px`(모바일).
+- **앱 셸**: `(main)`은 `h-dvh` 안에서 헤더·main·바텀네비가 높이를 나눠 갖도록 설계됐다(현재 `main`만 구현). main이 확정된 높이를 가지므로 내부 스크롤 화면은 `h-full`/`flex-1`만으로 동작한다 — 별도 높이 계산을 넣지 않는다.
+- **Safe area**: 바텀 탭바·상단 고정 토스트는 `env(safe-area-inset-*)`를 padding에 반영한다.
 
-### Z-index Scale
+z-index는 아래 6단계만 쓴다. 코드에서는 Tailwind `z-0`~`z-50`이 그대로 대응한다.
 
-| 레벨         | 값  | 용도                      |
+| Z-index      | 값  | 용도                      |
 | ------------ | --- | ------------------------- |
 | `z-base`     | 0   | 기본 콘텐츠               |
-| `z-sticky`   | 10  | 하단 탭바, 상단 고정 헤더 |
+| `z-sticky`   | 10  | 바텀 탭바, 고정 헤더      |
 | `z-dropdown` | 20  | 드롭다운, 팝오버          |
 | `z-toast`    | 30  | 토스트/스낵바             |
 | `z-modal`    | 40  | 모달 오버레이·본체        |
-| `z-tooltip`  | 50  | 툴팁(항상 최상단)         |
+| `z-tooltip`  | 50  | 툴팁 (항상 최상단)        |
 
----
+### Motion
 
-## Motion & Transition
-
-- **기본 트랜지션**: `150ms ease` — hover, focus, 버튼 active 등 즉각적인 상호작용
-- **진입/퇴장 트랜지션**: `200ms ease-out` — 모달, 토스트, 드롭다운 등 요소 등장/소멸
-- **강조 애니메이션**: skeleton 펄스는 `1.5s ease-in-out infinite`
-- 모든 애니메이션은 `prefers-reduced-motion: reduce` 사용자에게는 즉시 전환(트랜지션 없음)으로 대체
+- **기본 트랜지션** `150ms ease` — hover, focus, active
+- **진입/퇴장** `200ms ease-out` — 모달, 토스트, 드롭다운 (opacity + scale 0.96→1)
+- **skeleton 펄스** `1.5s ease-in-out infinite`
+- `prefers-reduced-motion: reduce`에서는 트랜지션 없이 즉시 전환
 
 ---
 
 ## ⑥ Depth & Elevation
 
-4단계 elevation을 사용하며, 그림자는 항상 1개만 적용합니다(중첩 금지).
+그림자는 **항상 하나만** 적용한다. 중첩 금지.
 
-| 레벨 | 용도                   | box-shadow (라이트)            | box-shadow (다크)             |
-| ---- | ---------------------- | ------------------------------ | ----------------------------- |
-| 0    | 페이지 배경, flat 요소 | none                           | none                          |
-| 1    | 카드, 리스트 아이템    | `0 1px 2px rgba(0,0,0,0.06)`   | `0 1px 2px rgba(0,0,0,0.4)`   |
-| 2    | 호버된 카드, 드롭다운  | `0 4px 8px rgba(0,0,0,0.10)`   | `0 4px 8px rgba(0,0,0,0.5)`   |
-| 3    | 팝오버, 툴팁           | `0 8px 16px rgba(0,0,0,0.14)`  | `0 8px 16px rgba(0,0,0,0.55)` |
-| 4    | 모달, 다이얼로그       | `0 16px 32px rgba(0,0,0,0.18)` | `0 16px 32px rgba(0,0,0,0.6)` |
+| 레벨 | 클래스               | 용도                   | Light                          | Dark                          |
+| ---- | -------------------- | ---------------------- | ------------------------------ | ----------------------------- |
+| 0    | (없음)               | 페이지 배경, flat 요소 | none                           | none                          |
+| 1    | `shadow-elevation-1` | 카드, 리스트 아이템    | `0 1px 2px rgba(0,0,0,0.06)`   | `0 1px 2px rgba(0,0,0,0.4)`   |
+| 2    | `shadow-elevation-2` | 호버된 카드, 드롭다운  | `0 4px 8px rgba(0,0,0,0.10)`   | `0 4px 8px rgba(0,0,0,0.5)`   |
+| 3    | `shadow-elevation-3` | 팝오버, 툴팁           | `0 8px 16px rgba(0,0,0,0.14)`  | `0 8px 16px rgba(0,0,0,0.55)` |
+| 4    | `shadow-elevation-4` | 모달, 다이얼로그       | `0 16px 32px rgba(0,0,0,0.18)` | `0 16px 32px rgba(0,0,0,0.6)` |
 
-다크모드에서는 그림자만으로 계층이 잘 드러나지 않으므로, `background.primary`(`#121418`) 위에 `background.surface`(`#1E232B`)를 얹어 서피스 자체를 한 단계 밝혀 계층을 표현하고, 위 표의 그림자는 보조적으로만 사용합니다.
+다크모드에서는 그림자만으로 계층이 드러나지 않는다. `bg-background`(`#121418`) 위에 `bg-card`(`#1E232B`)를 얹어 **서피스 자체를 한 단계 밝혀** 계층을 만들고, 그림자는 보조로만 쓴다.
 
 ---
 
@@ -274,38 +203,34 @@
 
 **Do**
 
-- 색상은 항상 시맨틱 토큰(`action.primary`, `text.title` 등)으로 참조하고, 컴포넌트 코드에 base HEX를 직접 하드코딩하지 않는다.
-- 시맨틱 컬러(Success/Warning/Danger)는 반드시 아이콘 또는 텍스트 라벨과 함께 사용한다 (색맹 사용자 접근성).
-- 스트릭/목표 달성 등 핵심 지표는 Geist Mono + Stat 스케일로 통일해서 시각적으로 바로 구분되게 한다.
-- Success/Warning/Danger는 **상태 표시 용도(배지, 스트릭 카드, 폼 검증, 삭제 확인)로만** 사용하고, 그 외 모든 UI(버튼, 내비게이션, 일러스트, 장식 요소)는 블루 계열(`action.*`, `text.*`)로만 구성해 브랜드 톤의 일관성을 지킨다.
+- 색상은 항상 시맨틱 클래스(`bg-primary`, `text-title`)로 참조한다. HEX는 `globals.css`에만 존재한다.
+- Success/Warning/Danger는 아이콘이나 텍스트 라벨과 **함께** 쓴다 (색맹 접근성).
+- 스트릭·목표 같은 핵심 지표는 `font-mono` + Stat 스케일로 통일한다.
+- 새 CSS 변수를 `:root`에 추가하면 `.dark`에도 **같은 커밋에서** 추가한다.
+- 아이콘은 Lucide만, stroke-width 2px, 16px(인라인) / 20px(버튼·인풋) / 24px(내비게이션). 색은 `text-muted-foreground` · `text-primary` · 상태색 중에서만.
 
 **Don't**
 
-- 그라데이션 배경을 사용하지 않는다 — 팔레트는 단색 톤으로만 구성한다.
-- 그림자를 두 개 이상 겹쳐 쓰지 않는다 (elevation 표 기준 1단계만 적용).
-- `action.primary` 배경 위에 `text.inverse`가 아닌 다른 텍스트 색을 올리지 않는다 (다크모드에서 `action.primary`는 옅은 블루라 흰 텍스트를 쓰면 대비가 무너진다).
-- 배지 요소에 임의의 새 색상을 추가하지 않는다 — `action.secondary` 또는 Success/Warning/Danger 중에서만 선택한다.
-- Success/Warning/Danger를 Primary 버튼, 내비게이션 활성 상태, 배경 장식 등 상태 표시가 아닌 곳에 사용하지 않는다 (예: "저장" 버튼을 초록색으로 만들지 않기 — 저장은 `action.primary`, 완료 확인 배지만 Success 사용).
+- 그라데이션 배경 금지. 팔레트는 단색 톤으로만 구성한다.
+- 그림자 2개 이상 겹치기 금지 (⑥ 표에서 하나만).
+- `bg-primary` 위에 `text-primary-foreground`가 아닌 텍스트 색 금지 (다크에서 대비가 무너진다).
+- Success/Warning/Danger를 Primary 버튼·내비게이션 활성·배경 장식에 쓰지 않는다. "저장" 버튼은 초록색이 아니라 `bg-primary`이고, 완료 확인 **배지**만 Success다.
+- 배지에 새 색 추가 금지 — `bg-secondary` 또는 상태색 셋 중에서만 고른다.
+- disabled를 `opacity-50`으로 처리하지 않는다 — `bg-disabled text-muted-foreground`가 규정이다.
+- `shadcn add <component>`로 재설치하면 Button/Input/Textarea의 커스터마이징이 **덮어써진다.** 재설치 후에는 각 파일 상단 주석의 항목을 다시 적용한다.
 
 ---
 
 ## ⑧ Responsive Behavior
 
-- **브레이크포인트** (Tailwind 기본값 사용)
+Tailwind 기본 브레이크포인트를 그대로 쓴다 — `sm` 640(큰 모바일) · `md` 768(태블릿) · `lg` 1024(데스크톱) · `xl` 1280px(와이드).
 
-| 이름 | 최소 너비 | 대상            |
-| ---- | --------- | --------------- |
-| `sm` | 640px     | 큰 모바일       |
-| `md` | 768px     | 태블릿          |
-| `lg` | 1024px    | 데스크톱        |
-| `xl` | 1280px    | 와이드 데스크톱 |
-
-- **터치 타깃 최소 크기**: 44×44px (모바일 버튼/아이콘 버튼)
-- **레이아웃 축소 전략**:
-  - `< md`: 사이드바 대신 하단 탭 내비게이션, 카드 1열 스택
-  - `md ~ lg`: 카드 2열 그리드, 사이드바는 아이콘만 표시(collapsed)
-  - `>= lg`: 사이드바 전체 노출(라벨 포함), 카드 3열 그리드, 컨테이너 최대 1200px로 센터 정렬
-- **반응형 타이포그래피**: `< md`에서는 H1 `28px`, H2 `20px`, Stat `24px`로 한 단계씩 축소 (Body/Small/Micro는 고정). `>= md`부터는 ③번 표의 기본값 적용.
+- **터치 타깃 최소 44×44px** — 아이콘 버튼은 `size="icon"`(`size-11`)을 쓴다.
+- **축소 전략**
+  - `< md`: 사이드바 대신 바텀 탭 내비게이션, 카드 1열 스택
+  - `md ~ lg`: 카드 2열 그리드, 사이드바는 아이콘만(collapsed)
+  - `>= lg`: 사이드바 전체 노출(라벨 포함), 카드 3열, 컨테이너 1200px 센터 정렬
+- **타이포그래피**: H1·H2·Stat만 `md` 미만에서 한 단계 축소(③ 표의 클래스에 이미 반영). Body/Small/Micro는 고정.
 
 ---
 
@@ -314,43 +239,21 @@
 ### 빠른 참조
 
 ```
-[Base]
-blue.50 #E3F2FD / blue.200 #90CAF9 / blue.500 #2196F3 / blue.900 #0D47A1
-darkScale.bg #121418 / darkScale.surface #1E232B
-gray100 #F5F5F5 / gray300 #E0E0E0 / gray500 #757575 / gray800 #333333
-
-[Light]
-background.primary #FFFFFF / background.surface #E3F2FD / background.subtle #F5F5F5
-text.title #0D47A1 / text.primary #333333 / text.secondary #757575 / text.inverse #FFFFFF
-action.primary #2196F3 (hover #0D47A1) / action.secondary #90CAF9 / action.disabled #E0E0E0
-border.default #E0E0E0 / border.focus #90CAF9
-
-[Dark]
-background.primary #121418 / background.surface #1E232B / background.subtle #0D47A1
-text.title #E3F2FD / text.primary #E0E0E0 / text.secondary #757575 / text.inverse #121418
-action.primary #90CAF9 (hover #2196F3) / action.secondary #0D47A1 / action.disabled #757575
-border.default #757575 / border.focus #2196F3
-
-Success #2E7D32 (다크 #66BB6A) / Warning #F9A825 (다크 #FFCA28) / Danger #C62828 (다크 #EF5350)
-폰트: Geist Sans + Noto Sans KR(본문) / Geist Mono(숫자·통계)
-Radius: 버튼 8px / 카드 12px / 배지 999px(pill)
-Spacing base: 4px
+bg-background · bg-card · bg-muted          text-title · text-foreground · text-muted-foreground
+bg-primary → hover:bg-primary-hover         disabled:bg-disabled  (opacity 금지)
+border-border · focus:border-ring+ring-3    text-success/warning/destructive (상태 전용)
+shadow-elevation-1~4 (하나만)               rounded-lg 버튼 / -xl 카드 / -full 배지
+간격 1·2·4·6·10·16 (4·8·16·24·40·64px)      font-sans 본문 / font-mono 통계
 ```
 
 ### 예시 프롬프트
 
-1. "DESIGN.md를 참고해서 오늘의 독서 목표와 연속 기록(스트릭)을 보여주는 대시보드 카드를 만들어줘. 색상은 시맨틱 토큰으로, Stat 텍스트는 Geist Mono로."
-2. "DESIGN.md 기준으로 독서 기록 입력 폼을 만들어줘. Input 컴포넌트 스타일과 Primary 버튼을 그대로 적용하고, 에러 상태도 포함해줘."
-3. "DESIGN.md의 Badge 스타일로 '7일 연속 달성' 뱃지 컴포넌트를 만들어줘. 라이트/다크 테마 토글에 따라 색이 자동으로 바뀌게 CSS 변수로 구현해줘."
-4. "DESIGN.md의 Note/Review Card 스타일로 서평 작성·조회 화면을 만들어줘. 책 표지 썸네일과 인용구 스타일을 포함해줘."
-5. "DESIGN.md의 Social Feed Item 스타일로 팔로우한 사용자들의 독서 활동 피드를 만들어줘. 좋아요/댓글 액션바 상태(비활성/활성)를 반영해줘."
-6. "DESIGN.md의 Streak Calendar 스타일로 최근 3개월 기록을 보여주는 히트맵을 만들어줘. 오늘 날짜 강조와 hover 툴팁 포함해줘."
-7. "DESIGN.md의 Toast 스타일로 기록 저장 성공/실패 알림을 만들어줘. Motion & Transition 섹션의 트랜지션 값을 그대로 적용해줘."
+1. "DESIGN.md 기준으로 오늘의 목표와 연속 기록을 보여주는 대시보드 카드를 만들어줘. ④의 신규 컴포넌트 파생 규칙을 따르고, 스트릭 숫자는 Stat 스케일로."
+2. "DESIGN.md의 Input·Button 규정 그대로 독서 기록 입력 폼을 만들어줘. `FormInput`을 쓰고 에러 상태까지 포함해줘."
+3. "DESIGN.md ⑥의 elevation 4단계와 ⑤의 z-modal을 써서 삭제 확인 다이얼로그를 만들어줘. 파괴적 액션이니 버튼은 `destructive` variant로."
 
----
+### 유지 원칙
 
-## 사용 안내
-
-- 이 파일은 프로젝트 루트에 두고, Claude Code 등 AI 코딩 에이전트에게 "DESIGN.md를 참고해서 ○○ 컴포넌트를 만들어줘"라고 요청하면 됩니다.
-- 디자인이 바뀌면 이 문서도 함께 업데이트해야 일관성이 유지됩니다.
-- `AGENTS.md`(행동/코딩 규칙)와는 역할이 다르며, 이 문서는 오직 시각적 외형만 담당합니다.
+- 이 문서와 `globals.css`는 한 커밋에서 함께 바뀐다. 문서만 고치거나 코드만 고치지 않는다.
+- 컴포넌트를 새로 만들면서 ④에 없는 규격을 정했다면, 그 규격을 여기 추가한 뒤 커밋한다.
+- `AGENTS.md`(행동·코딩 규칙)와 역할이 다르다. 이 문서는 오직 시각적 외형만 담당한다.
