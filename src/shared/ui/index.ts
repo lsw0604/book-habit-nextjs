@@ -6,6 +6,7 @@ export * from "./field";
 export * from "./form-input";
 export * from "./input";
 export * from "./label";
+export * from "./popover";
 export * from "./separator";
 export * from "./skeleton";
 export * from "./switch";
