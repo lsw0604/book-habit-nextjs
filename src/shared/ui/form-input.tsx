@@ -62,8 +62,8 @@ export function FormInput({
           aria-invalid={!!error}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            hasIcon && iconPosition === "left" && "pl-10",
-            hasIcon && iconPosition === "right" && "pr-10",
+            hasIcon && iconPosition === "left" && "pl-11",
+            hasIcon && iconPosition === "right" && "pr-11",
             inputClassName,
           )}
           {...props}
@@ -76,7 +76,7 @@ export function FormInput({
               aria-label={iconLabel}
               disabled={disabled}
               className={cn(
-                "absolute inset-y-0 flex w-10 items-center justify-center rounded-lg",
+                "absolute inset-y-0 flex w-11 items-center justify-center rounded-lg",
                 "text-muted-foreground transition-colors hover:text-foreground",
                 "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
@@ -89,7 +89,7 @@ export function FormInput({
             <div
               aria-hidden="true"
               className={cn(
-                "pointer-events-none absolute inset-y-0 flex w-10 items-center justify-center",
+                "pointer-events-none absolute inset-y-0 flex w-11 items-center justify-center",
                 "text-muted-foreground",
                 iconPosition === "left" ? "left-0" : "right-0",
               )}
