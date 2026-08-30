@@ -12,8 +12,9 @@ import {
   FormInput,
   FieldGroup,
 } from "@/shared/ui";
+import { isAPIError } from "@/shared/api";
 
-import { useLoginForm } from "../hooks";
+import { useLoginForm, useLogin } from "../hooks";
 import { LoginType } from "../model";
 import { KakaoLoginButton } from "./kakao-login-button";
 
@@ -21,10 +22,19 @@ export function LoginForm() {
   const {
     handleSubmit,
     control,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting },
   } = useLoginForm();
-  const onSubmit = (data: LoginType) => {
-    console.log(data);
+  const { mutateAsync } = useLogin();
+
+  const onSubmit = async (data: LoginType) => {
+    try {
+      await mutateAsync(data);
+    } catch (error) {
+      setError("root", {
+        message: isAPIError(error) ? error.message : "로그인에 실패했어요.",
+      });
+    }
   };
 
   return (
@@ -43,9 +53,13 @@ export function LoginForm() {
           </Link>
         </p>
       </FieldGroup>
-      {errors.root && <FieldError>{errors.root.message}</FieldError>}
+      {errors.root && (
+        <FieldError className="mt-2 whitespace-pre-line">
+          {errors.root.message}
+        </FieldError>
+      )}
       <Separator className="my-4" />
-      <LoginFooter />
+      <LoginFooter isSubmitting={isSubmitting} />
     </form>
   );
 }
@@ -121,11 +135,16 @@ function PasswordField({ control }: { control: Control<LoginType> }) {
   );
 }
 
-function LoginFooter() {
+function LoginFooter({ isSubmitting }: { isSubmitting: boolean }) {
   return (
     <footer className="mt-4 flex flex-col gap-2">
-      <Button variant="default" type="submit" className="w-full">
-        로그인
+      <Button
+        variant="default"
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full"
+      >
+        {isSubmitting ? "로그인 중…" : "로그인"}
       </Button>
       <KakaoLoginButton />
     </footer>
