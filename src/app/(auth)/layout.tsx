@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { BackButton } from "./_shell/back-button";
+
 /**
  * 로그인·회원가입처럼 세션이 아직 없는 화면들의 그룹.
  *
@@ -9,8 +11,13 @@ import type { ReactNode } from "react";
  */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="flex min-h-full flex-1 items-center justify-center p-6">
-      <div className="w-full max-w-sm">{children}</div>
-    </main>
+    <div className="flex min-h-dvh flex-col">
+      <header className="p-4">
+        <BackButton />
+      </header>
+      <main className="flex flex-1 items-center justify-center">
+        <div className="w-full max-w-sm">{children}</div>
+      </main>
+    </div>
   );
 }

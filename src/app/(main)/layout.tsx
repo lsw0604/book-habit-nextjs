@@ -1,6 +1,8 @@
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
+import { AppShell } from "./_shell";
+
 import { userQueryKeys, userService } from "@/entities/user";
 import { getQueryClient } from "@/shared/api";
 import { withServerAuth } from "@/shared/api/server";
@@ -34,7 +36,7 @@ export default async function MainLayout({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {children}
+      <AppShell>{children}</AppShell>
     </HydrationBoundary>
   );
 }

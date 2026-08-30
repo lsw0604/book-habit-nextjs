@@ -18,17 +18,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-/**
- * 한글용.
- *
- * `subsets`에 `korean`이 없다 — Google Fonts가 CJK는 별도 subset으로 노출하지
- * 않고 unicode-range로 잘게 쪼개 서빙하기 때문이다. `latin`만 지정해도 한글
- * 슬라이스가 함께 생성된다.
- */
 const notoSansKR = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -40,9 +32,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ko"
-      className={`${geistSans.variable} ${geistMono.variable} ${notoSansKR.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${notoSansKR.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body>
         <QueryProvider>
           <ApiProvider>
             <AuthProvider>{children}</AuthProvider>
