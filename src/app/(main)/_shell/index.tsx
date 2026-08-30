@@ -22,7 +22,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex h-dvh flex-col overflow-hidden">
         <main
           ref={mainRef}
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-none"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto no-scrollbar"
         >
           {children}
         </main>
