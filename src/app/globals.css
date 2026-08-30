@@ -63,6 +63,15 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /*
+   * DESIGN.md ⑥ Depth & Elevation. 레벨 0(flat)은 Tailwind 기본 shadow-none과
+   * 같아 별도 토큰이 필요 없다. shadow-elevation-{1..4}로 사용한다.
+   */
+  --shadow-elevation-1: var(--shadow-elevation-1);
+  --shadow-elevation-2: var(--shadow-elevation-2);
+  --shadow-elevation-3: var(--shadow-elevation-3);
+  --shadow-elevation-4: var(--shadow-elevation-4);
 }
 
 /* Light — DESIGN.md ② Light Theme */
@@ -95,6 +104,11 @@
   --border: #e0e0e0; /* border.default */
   --input: #e0e0e0;
   --ring: #90caf9; /* border.focus */
+
+  --shadow-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-elevation-2: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-elevation-3: 0 8px 16px rgba(0, 0, 0, 0.14);
+  --shadow-elevation-4: 0 16px 32px rgba(0, 0, 0, 0.18);
 
   /*
    * DESIGN.md는 버튼 8px / 카드 12px를 요구하는데 shadcn은 --radius 하나에서
@@ -158,6 +172,11 @@
   --border: #757575;
   --input: #757575;
   --ring: #2196f3; /* border.focus */
+
+  --shadow-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-elevation-2: 0 4px 8px rgba(0, 0, 0, 0.5);
+  --shadow-elevation-3: 0 8px 16px rgba(0, 0, 0, 0.55);
+  --shadow-elevation-4: 0 16px 32px rgba(0, 0, 0, 0.6);
 
   --chart-1: #90caf9;
   --chart-2: #2196f3;
