@@ -8,8 +8,8 @@
 
 - **토큰**: 컬러·elevation·radius 전부 `globals.css`에 구현 완료.
 - **다크 테마**: 변수는 `.dark`에 정의됐지만 클래스를 붙이는 토글이 아직 없다 → 현재는 라이트만 렌더링된다. 그래도 신규 코드는 다크 대비를 항상 함께 검증한다.
-- **구현된 컴포넌트** (`src/shared/ui/`): Button, Input, Textarea, Checkbox, Switch, Label, Field, Separator, Avatar, Skeleton, Tooltip, Calendar.
-- **미구현**: Card, Badge, Toast, Modal, Progress, Streak Heatmap, Feed Item 등 → ④의 **신규 컴포넌트 파생 규칙**을 따라 만든다.
+- **구현된 컴포넌트** (`src/shared/ui/`): Button, Input, Textarea, Checkbox, Switch, Label, Field, Separator, Avatar, Skeleton, Tooltip, Calendar, ActivityCalendar.
+- **미구현**: Card, Badge, Toast, Modal, Progress, 연간 Streak Heatmap, Feed Item 등 → ④의 **신규 컴포넌트 파생 규칙**을 따라 만든다.
 
 ---
 
@@ -33,29 +33,29 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 
 **시맨틱 토큰 ↔ 코드** — 이 표가 정본이다.
 
-| 역할                  | CSS 변수                        | Tailwind 클래스                        | Light     | Dark      |
-| --------------------- | ------------------------------- | -------------------------------------- | --------- | --------- |
-| 배경(기본)            | `--background`                  | `bg-background`                        | `#FFFFFF` | `#121418` |
-| 배경(서피스/카드)     | `--card` · `--accent`           | `bg-card` · `hover:bg-accent`          | `#E3F2FD` | `#1E232B` |
-| 배경(옅은 구획)       | `--muted`                       | `bg-muted`                             | `#F5F5F5` | `#1E232B` |
-| 텍스트(타이틀)        | `--title`                       | `text-title`                           | `#0D47A1` | `#E3F2FD` |
-| 텍스트(본문)          | `--foreground`                  | `text-foreground`                      | `#333333` | `#E0E0E0` |
-| 텍스트(보조)          | `--muted-foreground`            | `text-muted-foreground`                | `#757575` | `#757575` |
-| 텍스트(반전, 버튼 위) | `--primary-foreground`          | `text-primary-foreground`              | `#FFFFFF` | `#121418` |
-| 액션(기본)            | `--primary`                     | `bg-primary` · `text-primary`          | `#2196F3` | `#90CAF9` |
-| 액션(hover)           | `--primary-hover`               | `hover:bg-primary-hover`               | `#0D47A1` | `#2196F3` |
-| 액션(보조)            | `--secondary`                   | `bg-secondary`                         | `#90CAF9` | `#0D47A1` |
-| 액션(비활성)          | `--disabled`                    | `disabled:bg-disabled`                 | `#E0E0E0` | `#757575` |
-| 보더(기본)            | `--border` · `--input`          | `border-border` · `border-input`       | `#E0E0E0` | `#757575` |
-| 보더/링(포커스)       | `--ring`                        | `focus-visible:border-ring` `ring-ring`| `#90CAF9` | `#2196F3` |
+| 역할                  | CSS 변수               | Tailwind 클래스                         | Light     | Dark      |
+| --------------------- | ---------------------- | --------------------------------------- | --------- | --------- |
+| 배경(기본)            | `--background`         | `bg-background`                         | `#FFFFFF` | `#121418` |
+| 배경(서피스/카드)     | `--card` · `--accent`  | `bg-card` · `hover:bg-accent`           | `#E3F2FD` | `#1E232B` |
+| 배경(옅은 구획)       | `--muted`              | `bg-muted`                              | `#F5F5F5` | `#1E232B` |
+| 텍스트(타이틀)        | `--title`              | `text-title`                            | `#0D47A1` | `#E3F2FD` |
+| 텍스트(본문)          | `--foreground`         | `text-foreground`                       | `#333333` | `#E0E0E0` |
+| 텍스트(보조)          | `--muted-foreground`   | `text-muted-foreground`                 | `#757575` | `#757575` |
+| 텍스트(반전, 버튼 위) | `--primary-foreground` | `text-primary-foreground`               | `#FFFFFF` | `#121418` |
+| 액션(기본)            | `--primary`            | `bg-primary` · `text-primary`           | `#2196F3` | `#90CAF9` |
+| 액션(hover)           | `--primary-hover`      | `hover:bg-primary-hover`                | `#0D47A1` | `#2196F3` |
+| 액션(보조)            | `--secondary`          | `bg-secondary`                          | `#90CAF9` | `#0D47A1` |
+| 액션(비활성)          | `--disabled`           | `disabled:bg-disabled`                  | `#E0E0E0` | `#757575` |
+| 보더(기본)            | `--border` · `--input` | `border-border` · `border-input`        | `#E0E0E0` | `#757575` |
+| 보더/링(포커스)       | `--ring`               | `focus-visible:border-ring` `ring-ring` | `#90CAF9` | `#2196F3` |
 
 **상태색 (Success / Warning / Danger)** — 스트릭·목표·폼 검증 전용.
 
-| 역할    | CSS 변수        | Tailwind 클래스                        | Light     | Dark      |
-| ------- | --------------- | -------------------------------------- | --------- | --------- |
-| Success | `--success`     | `text-success` · `bg-success`          | `#2E7D32` | `#66BB6A` |
-| Warning | `--warning`     | `text-warning` · `bg-warning`          | `#F9A825` | `#FFCA28` |
-| Danger  | `--destructive` | `text-destructive` · `bg-destructive`  | `#C62828` | `#EF5350` |
+| 역할    | CSS 변수        | Tailwind 클래스                       | Light     | Dark      |
+| ------- | --------------- | ------------------------------------- | --------- | --------- |
+| Success | `--success`     | `text-success` · `bg-success`         | `#2E7D32` | `#66BB6A` |
+| Warning | `--warning`     | `text-warning` · `bg-warning`         | `#F9A825` | `#FFCA28` |
+| Danger  | `--destructive` | `text-destructive` · `bg-destructive` | `#C62828` | `#EF5350` |
 
 **차트**: `--chart-1`~`--chart-5`가 블루 계열 + 중립으로 정의돼 있다(`chart-1`이 가장 강조). 통계 화면은 이 순서대로 쓴다.
 
@@ -69,15 +69,15 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 
 `--font-sans` = `Geist Sans → Noto Sans KR → ui-sans-serif → system-ui`. Geist에 한글 글리프가 없고 폰트 폴백은 글리프 단위로 동작하므로 **영문·숫자는 Geist, 한글은 Noto**가 받는다 — 순서를 바꾸지 않는다. 숫자·통계는 `font-mono`(Geist Mono).
 
-| 레벨  | 크기 (모바일 / `md`↑) | 굵기 | line-height | Tailwind 클래스                                                    | 용도            |
-| ----- | --------------------- | ---- | ----------- | ------------------------------------------------------------------ | --------------- |
-| H1    | 28px / 32px           | 700  | 1.25        | `text-[1.75rem] md:text-[2rem] leading-tight font-bold tracking-[-0.01em]` | 페이지 타이틀   |
-| H2    | 20px / 24px           | 700  | 1.3         | `text-xl md:text-2xl leading-[1.3] font-bold tracking-[-0.01em]`   | 섹션 타이틀     |
-| H3    | 20px                  | 600  | 1.35        | `text-xl leading-[1.35] font-semibold`                             | 카드 제목       |
-| Body  | 16px                  | 400  | 1.6         | `text-base leading-[1.6]`                                          | 본문            |
-| Small | 14px                  | 400  | 1.5         | `text-sm leading-normal`                                           | 보조 설명, 캡션 |
-| Micro | 12px                  | 500  | 1.4         | `text-xs leading-[1.4] font-medium`                                | 배지, 타임스탬프|
-| Stat  | 24px / 28px           | 700  | 1.2         | `font-mono text-2xl md:text-[1.75rem] leading-[1.2] font-bold`     | 스트릭 일수, 통계 |
+| 레벨  | 크기 (모바일 / `md`↑) | 굵기 | line-height | Tailwind 클래스                                                            | 용도              |
+| ----- | --------------------- | ---- | ----------- | -------------------------------------------------------------------------- | ----------------- |
+| H1    | 28px / 32px           | 700  | 1.25        | `text-[1.75rem] md:text-[2rem] leading-tight font-bold tracking-[-0.01em]` | 페이지 타이틀     |
+| H2    | 20px / 24px           | 700  | 1.3         | `text-xl md:text-2xl leading-[1.3] font-bold tracking-[-0.01em]`           | 섹션 타이틀       |
+| H3    | 20px                  | 600  | 1.35        | `text-xl leading-[1.35] font-semibold`                                     | 카드 제목         |
+| Body  | 16px                  | 400  | 1.6         | `text-base leading-[1.6]`                                                  | 본문              |
+| Small | 14px                  | 400  | 1.5         | `text-sm leading-normal`                                                   | 보조 설명, 캡션   |
+| Micro | 12px                  | 500  | 1.4         | `text-xs leading-[1.4] font-medium`                                        | 배지, 타임스탬프  |
+| Stat  | 24px / 28px           | 700  | 1.2         | `font-mono text-2xl md:text-[1.75rem] leading-[1.2] font-bold`             | 스트릭 일수, 통계 |
 
 - letter-spacing은 기본 `0`, H1·H2만 `-0.01em`로 좁힌다.
 - Body/Small/Micro는 반응형으로 줄이지 않는다. 서평 본문은 `md:text-sm`으로 축소 금지 — 가독성이 ①의 원칙이다.
@@ -98,14 +98,14 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 
 **Button** — `variant` × `size` 조합. 기본 padding `10px 20px`, Body 16px, `rounded-lg`. 모바일 터치 타깃 44×44px은 이 padding에서 충족된다.
 
-| variant       | 기본                                | hover                     |
-| ------------- | ----------------------------------- | ------------------------- |
-| `default`     | `bg-primary text-primary-foreground`| `bg-primary-hover`        |
-| `outline`     | 투명 배경 + `border-primary text-primary` | `bg-accent`          |
-| `secondary`   | `bg-secondary text-secondary-foreground` | `bg-primary-hover`   |
-| `ghost`       | `text-primary`, 배경 없음           | `bg-accent`               |
+| variant       | 기본                                         | hover               |
+| ------------- | -------------------------------------------- | ------------------- |
+| `default`     | `bg-primary text-primary-foreground`         | `bg-primary-hover`  |
+| `outline`     | 투명 배경 + `border-primary text-primary`    | `bg-accent`         |
+| `secondary`   | `bg-secondary text-secondary-foreground`     | `bg-primary-hover`  |
+| `ghost`       | `text-primary`, 배경 없음                    | `bg-accent`         |
 | `destructive` | `bg-destructive` — **삭제·파괴적 액션 전용** | `bg-destructive/85` |
-| `link`        | `text-primary`, 밑줄 오프셋 4px     | `underline`               |
+| `link`        | `text-primary`, 밑줄 오프셋 4px              | `underline`         |
 
 - size: `default`(px-5 py-2.5) · `sm`(px-4 py-2 text-sm) · `lg`(px-6 py-3) · `icon`(44×44) · `icon-sm`(36×36)
 - Focus: `ring-2 ring-ring` + `ring-offset-2`
@@ -118,16 +118,25 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 - Error: `aria-invalid`로 `border-destructive` + `ring-3 ring-destructive/20`, 하단에 `FieldError`(Small, `text-destructive`)
 - Disabled: `bg-disabled text-muted-foreground` / Textarea는 `field-sizing-content` + `min-h-16`
 
-| 컴포넌트    | 규격                                                                                              |
-| ----------- | ------------------------------------------------------------------------------------------------- |
-| `FormInput` | Label + Input + FieldError 조합. `id` 필수(라벨 연결 + `aria-describedby`). 아이콘 16px, 좌/우 배치. `onIconClick`을 주면 버튼으로 렌더링되고 `iconLabel`이 강제된다 |
-| `Checkbox`  | 16×16px, `rounded-[4px]`, `border-input`. 체크 시 `bg-primary` + 14px 체크 아이콘. 터치 여유는 `after:-inset-x-3 after:-inset-y-2` |
-| `Switch`    | 트랙 32×18.4px (`sm` 24×14px), `rounded-full`. off `bg-input` / on `bg-primary`. knob은 `bg-background` 원(16px, `sm` 12px) |
+| 컴포넌트    | 규격                                                                                                                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FormInput` | Label + Input + FieldError 조합. `id` 필수(라벨 연결 + `aria-describedby`). 아이콘 16px, 좌/우 배치. `onIconClick`을 주면 버튼으로 렌더링되고 `iconLabel`이 강제된다            |
+| `Checkbox`  | 16×16px, `rounded-[4px]`, `border-input`. 체크 시 `bg-primary` + 14px 체크 아이콘. 터치 여유는 `after:-inset-x-3 after:-inset-y-2`                                              |
+| `Switch`    | 트랙 32×18.4px (`sm` 24×14px), `rounded-full`. off `bg-input` / on `bg-primary`. knob은 `bg-background` 원(16px, `sm` 12px)                                                     |
 | `Avatar`    | `sm` 24 · `default` 32 · `lg` 40px, `rounded-full`. 이미지 없으면 `bg-muted` 위 이니셜(Small, `text-muted-foreground`). `AvatarGroup`은 `-space-x-2` + `ring-2 ring-background` |
-| `Label`     | Small 14px `font-medium leading-none`                                                              |
-| `Separator` | `bg-border`, 1px                                                                                   |
-| `Skeleton`  | `bg-muted animate-pulse` (주기 1.5s)                                                               |
-| `Tooltip`   | `z-50`(= z-tooltip), 반전 배경 `bg-foreground` + 화살표                                            |
+| `Label`     | Small 14px `font-medium leading-none`                                                                                                                                           |
+| `Separator` | `bg-border`, 1px                                                                                                                                                                |
+| `Skeleton`  | `bg-muted animate-pulse` (주기 1.5s)                                                                                                                                            |
+| `Tooltip`   | `z-50`(= z-tooltip), 반전 배경 `bg-foreground` + 화살표                                                                                                                         |
+
+**ActivityCalendar** — 월 단위 활동 캘린더. 카드 껍데기는 `bg-card` + `rounded-xl` + `shadow-elevation-1` + `p-4 md:p-6`, 헤더 제목은 H2, 월 이동은 `size="icon"` 버튼 + 20px Chevron, 그리드는 `grid-cols-7 gap-1`에 요일 헤더 Micro + `text-muted-foreground`.
+
+- **지면**: 라이트에서 `bg-background`(흰색), 다크에서 `bg-card`. `bg-card`(`#E3F2FD`)는 흰 바탕 위 primary 약 14%와 같은 색이라 잔디 램프(1단계 = 25%) 안쪽에 들어와, 빈 날이 '조금 기록한 날'처럼 보인다. 다크는 지면이 램프의 최저점이라 그 혼동이 없고 ⑥의 계층 규칙도 서피스를 요구하므로 `bg-card`를 유지한다. 카드 경계는 `border-border` + `shadow-elevation-1`이 맡는다. **차트·히트맵을 담는 서피스는 모두 이 규칙을 따른다** — 인코딩에 쓰는 색과 지면 색이 같은 계열이면 지면이 값처럼 읽힌다.
+- 날짜 숫자는 셀 좌측 상단(`top-1 left-1`, Micro 스케일)에 고정한다. 셀 콘텐츠가 달라도 날짜 위치가 같아야 한 달을 훑을 수 있다.
+- 날짜 셀의 겉 `<button>`은 포커스 링만 갖는다. **배경·비율·날짜 숫자는 `DayComponent`가 소유한다** — 잔디처럼 셀을 가득 칠하거나 책 표지로 채우려면 겉껍데기가 시각적 결정을 하면 안 된다.
+- **잔디(활동량 음영)**: `bg-muted` → `bg-primary/25` → `/50` → `/75` → `bg-primary` 5단계. `/75`부터 텍스트는 `text-primary-foreground`. Success를 쓰지 않는 이유는 ⑦(상태색은 상태 표시 전용)이다. 색만으로 정보를 주지 않도록 기록 개수를 `aria-label`에 싣는다.
+- **점(`ActivityDotDay`)**: 같은 개수를 `bg-primary` 점 개수로 인코딩한다(`size-1.5`, `gap-1`, 최대 3개). 셀을 칠하지 않아 지면 충돌이 없고 날짜 숫자에 반전이 필요 없다. 선택 표시는 채우기가 아니라 `ring-2 ring-ring` — `bg-primary`로 채우면 같은 색인 점이 사라진다. **"어느 주가 빽빽했나"를 스캔하려면 잔디, "이 날 몇 건인가"를 세려면 점**을 쓴다.
+- **주말**: `text-muted-foreground`로 물러난다. 일요일 빨강 같은 한국 달력 관행은 상태색을 장식에 쓰는 것이라, 채택하려면 카카오 버튼처럼 별도 예외 조항이 필요하다.
 
 **예외 — 카카오 로그인 버튼**: ⑦의 "버튼은 블루 계열만" 규칙에서 유일하게 면제된다. 카카오 개발자 가이드가 배경 `#FEE500` · 텍스트 `rgba(0,0,0,.85)`를 요구하는 **서드파티 브랜드 규정**이기 때문이다. 이 예외를 다른 소셜 버튼으로 확장할 때도 같은 근거(공식 브랜드 가이드)가 있어야 한다.
 
@@ -149,14 +158,14 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 
 **Base unit 4px.** 모든 spacing은 4의 배수.
 
-| 토큰        | 값   | Tailwind      | 용도                                    |
-| ----------- | ---- | ------------- | --------------------------------------- |
-| `space-xs`  | 4px  | `gap-1` `p-1` | 아이콘–텍스트 간격                      |
-| `space-sm`  | 8px  | `gap-2` `p-2` | 인풋 내부 여백, 배지 padding            |
-| `space-md`  | 16px | `gap-4` `p-4` | 카드 내부 padding(모바일), 컴포넌트 간격|
-| `space-lg`  | 24px | `gap-6` `p-6` | 섹션 padding(데스크톱), 카드 간 간격    |
-| `space-xl`  | 40px | `gap-10`      | 섹션과 섹션 사이                        |
-| `space-2xl` | 64px | `gap-16`      | 페이지 상단 여백, 큰 구획 분리          |
+| 토큰        | 값   | Tailwind      | 용도                                     |
+| ----------- | ---- | ------------- | ---------------------------------------- |
+| `space-xs`  | 4px  | `gap-1` `p-1` | 아이콘–텍스트 간격                       |
+| `space-sm`  | 8px  | `gap-2` `p-2` | 인풋 내부 여백, 배지 padding             |
+| `space-md`  | 16px | `gap-4` `p-4` | 카드 내부 padding(모바일), 컴포넌트 간격 |
+| `space-lg`  | 24px | `gap-6` `p-6` | 섹션 padding(데스크톱), 카드 간 간격     |
+| `space-xl`  | 40px | `gap-10`      | 섹션과 섹션 사이                         |
+| `space-2xl` | 64px | `gap-16`      | 페이지 상단 여백, 큰 구획 분리           |
 
 - **컨테이너**: 최대 `1200px` 센터 정렬, 좌우 padding `16~24px`. 인증 화면처럼 좁은 폼은 `max-w-sm`.
 - **그리드**: 12-column, gutter `24px`(데스크톱) / `16px`(모바일).
@@ -165,14 +174,14 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 
 z-index는 아래 6단계만 쓴다. 코드에서는 Tailwind `z-0`~`z-50`이 그대로 대응한다.
 
-| Z-index      | 값  | 용도                      |
-| ------------ | --- | ------------------------- |
-| `z-base`     | 0   | 기본 콘텐츠               |
-| `z-sticky`   | 10  | 바텀 탭바, 고정 헤더      |
-| `z-dropdown` | 20  | 드롭다운, 팝오버          |
-| `z-toast`    | 30  | 토스트/스낵바             |
-| `z-modal`    | 40  | 모달 오버레이·본체        |
-| `z-tooltip`  | 50  | 툴팁 (항상 최상단)        |
+| Z-index      | 값  | 용도                 |
+| ------------ | --- | -------------------- |
+| `z-base`     | 0   | 기본 콘텐츠          |
+| `z-sticky`   | 10  | 바텀 탭바, 고정 헤더 |
+| `z-dropdown` | 20  | 드롭다운, 팝오버     |
+| `z-toast`    | 30  | 토스트/스낵바        |
+| `z-modal`    | 40  | 모달 오버레이·본체   |
+| `z-tooltip`  | 50  | 툴팁 (항상 최상단)   |
 
 ### Motion
 
