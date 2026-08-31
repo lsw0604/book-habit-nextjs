@@ -4,7 +4,7 @@
 > 이 문서의 모든 값은 `src/app/globals.css`에 CSS 변수로 구현되어 있다.
 > 각 표의 **CSS 변수 / 클래스** 열이 코드와의 계약이다. 컴포넌트는 HEX가 아니라 그 클래스를 쓴다.
 
-### 구현 현황 (2026-08-30)
+### 구현 현황 (2026-08-31)
 
 - **토큰**: 컬러·elevation·radius 전부 `globals.css`에 구현 완료.
 - **다크 테마**: 변수는 `.dark`에 정의됐지만 클래스를 붙이는 토글이 아직 없다 → 현재는 라이트만 렌더링된다. 그래도 신규 코드는 다크 대비를 항상 함께 검증한다.
@@ -131,7 +131,7 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 
 **ActivityCalendar** — 월 단위 활동 캘린더. 카드 껍데기는 `bg-card` + `rounded-xl` + `shadow-elevation-1` + `p-4 md:p-6`, 헤더 제목은 H2, 월 이동은 `size="icon"` 버튼 + 20px Chevron, 그리드는 `grid-cols-7 gap-1`에 요일 헤더 Micro + `text-muted-foreground`.
 
-- **지면**: 라이트에서 `bg-background`(흰색), 다크에서 `bg-card`. `bg-card`(`#E3F2FD`)는 흰 바탕 위 primary 약 14%와 같은 색이라 잔디 램프(1단계 = 25%) 안쪽에 들어와, 빈 날이 '조금 기록한 날'처럼 보인다. 다크는 지면이 램프의 최저점이라 그 혼동이 없고 ⑥의 계층 규칙도 서피스를 요구하므로 `bg-card`를 유지한다. 카드 경계는 `border-border` + `shadow-elevation-1`이 맡는다. **차트·히트맵을 담는 서피스는 모두 이 규칙을 따른다** — 인코딩에 쓰는 색과 지면 색이 같은 계열이면 지면이 값처럼 읽힌다.
+- **지면**: 라이트에서 `bg-background`(흰색), 다크에서 `bg-card`. `bg-card`(`#E3F2FD`)는 흰 바탕 위 primary 약 14%와 같은 색이라 잔디 램프(1단계 = 25%) 안쪽에 들어와, 빈 날이 '조금 기록한 날'처럼 보인다. 다크는 지면이 램프의 최저점이라 그 혼동이 없고 ⑥의 계층 규칙도 서피스를 요구하므로 `bg-card`를 유지한다. 카드 경계는 `border-border` + `shadow-elevation-1`이 맡는다. **차트·히트맵을 담는 서피스는 모두 이 규칙을 따른다** — 인코딩에 쓰는 색과 지면 색이 같은 계열이면 지면이 값처럼 읽힌다. 이 캘린더를 `Popover`처럼 기본 배경이 `bg-card`인 범용 오버레이 안에 넣을 때도 동일하다 — `Calendar`는 `in-data-[slot=popover-content]:bg-transparent`로 부모 배경을 그대로 물려받으므로, 오버레이 콘텐츠 쪽에 `bg-background dark:bg-card`를 로컬로 오버라이드한다(예: `input-datepicker`).
 - 날짜 숫자는 셀 좌측 상단(`top-1 left-1`, Micro 스케일)에 고정한다. 셀 콘텐츠가 달라도 날짜 위치가 같아야 한 달을 훑을 수 있다.
 - 날짜 셀의 겉 `<button>`은 포커스 링만 갖는다. **배경·비율·날짜 숫자는 `DayComponent`가 소유한다** — 잔디처럼 셀을 가득 칠하거나 책 표지로 채우려면 겉껍데기가 시각적 결정을 하면 안 된다.
 - **잔디(활동량 음영)**: `bg-muted` → `bg-primary/25` → `/50` → `/75` → `bg-primary` 5단계. `/75`부터 텍스트는 `text-primary-foreground`. Success를 쓰지 않는 이유는 ⑦(상태색은 상태 표시 전용)이다. 색만으로 정보를 주지 않도록 기록 개수를 `aria-label`에 싣는다.
@@ -144,7 +144,7 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 
 아직 없는 컴포넌트(Card, Badge, Toast, Modal, Progress, Heatmap, Feed Item 등)를 만들 때는 새 값을 발명하지 말고 아래에서 조합한다.
 
-1. **배경** — 얹히는 서피스 `bg-card`, 물러나는 구획 `bg-muted`, 오버레이 본체 `bg-background`
+1. **배경** — 얹히는 서피스 `bg-card`, 물러나는 구획 `bg-muted`, 오버레이 본체 `bg-background`. 단, 값을 색으로 인코딩하는 서피스(캘린더·히트맵·차트)는 이 기본값 대신 위 ActivityCalendar의 지면 규칙을 우선한다.
 2. **테두리·반경** — `border border-border` + 위 Radius 스케일
 3. **그림자** — `shadow-elevation-{1..4}` 중 **하나만**: 카드 1 / 드롭다운·hover 2 / 팝오버·툴팁 3 / 모달 4
 4. **텍스트** — 제목 `text-title`, 본문 `text-foreground`, 메타 `text-muted-foreground`
