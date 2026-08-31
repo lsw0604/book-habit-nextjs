@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import type { OnSelectHandler } from "react-day-picker";
 
 import {
@@ -51,13 +51,10 @@ export const useInputDatepicker = ({
    */
   const emittedRef = useRef<Date | undefined>(value);
 
-  const notifyChange = useCallback(
-    (day: Date | undefined) => {
-      emittedRef.current = day;
-      onChange(day);
-    },
-    [onChange]
-  );
+  const notifyChange = (day: Date | undefined) => {
+    emittedRef.current = day;
+    onChange(day);
+  };
 
   // 폼 reset처럼 밖에서 값이 바뀐 경우에만 입력칸을 값에 맞춘다
   useEffect(() => {
@@ -68,59 +65,53 @@ export const useInputDatepicker = ({
     setInternalError(null);
   }, [value]);
 
-  const handleInputChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const digits = extractDigits(
-        e.target.value,
-        INPUT_DATEPICKER_CONSTRAINTS.MAX_DIGITS
-      );
-      setDateStr(addSeparatorsToDateString(digits));
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const digits = extractDigits(
+      e.target.value,
+      INPUT_DATEPICKER_CONSTRAINTS.MAX_DIGITS
+    );
+    setDateStr(addSeparatorsToDateString(digits));
 
-      let newDate: Date | null = null;
-      let newError: string | null = null;
+    let newDate: Date | null = null;
+    let newError: string | null = null;
 
-      const partialError = validatePartialDate(digits, bounds);
+    const partialError = validatePartialDate(digits, bounds);
 
-      if (partialError) {
-        newError = partialError;
-      } else if (digits.length === INPUT_DATEPICKER_CONSTRAINTS.MAX_DIGITS) {
-        const { date, error: fullError } = parseAndValidateDate(digits, bounds);
+    if (partialError) {
+      newError = partialError;
+    } else if (digits.length === INPUT_DATEPICKER_CONSTRAINTS.MAX_DIGITS) {
+      const { date, error: fullError } = parseAndValidateDate(digits, bounds);
 
-        if (fullError) {
-          newError = fullError;
-        } else {
-          newDate = date;
-        }
+      if (fullError) {
+        newError = fullError;
+      } else {
+        newDate = date;
       }
+    }
 
-      setInternalError(newError);
+    setInternalError(newError);
 
-      if (newDate) {
-        if (!value || newDate.getTime() !== value.getTime()) {
-          notifyChange(newDate);
-        }
-      } else if (value) {
-        // 날짜가 완성되지 않은 동안에는 값을 비워 둔다
-        notifyChange(undefined);
+    if (newDate) {
+      if (!value || newDate.getTime() !== value.getTime()) {
+        notifyChange(newDate);
       }
-    },
-    [value, notifyChange, bounds]
-  );
+    } else if (value) {
+      // 날짜가 완성되지 않은 동안에는 값을 비워 둔다
+      notifyChange(undefined);
+    }
+  };
 
-  const handleCalendarSelect: OnSelectHandler<Date | undefined> = useCallback(
-    (day) => {
-      notifyChange(day);
-      setInternalError(null);
-      setDateStr(day ? format(day, INPUT_DATEPICKER_FORMAT.DISPLAY) : "");
-    },
-    [notifyChange],
-  );
+  const handleCalendarSelect: OnSelectHandler<Date | undefined> = (day) => {
+    notifyChange(day);
+    setInternalError(null);
+    setDateStr(day ? format(day, INPUT_DATEPICKER_FORMAT.DISPLAY) : "");
+  };
 
-  const handleClearDate = useCallback(() => {
+  const handleClearDate = () => {
     notifyChange(undefined);
     setDateStr("");
     setInternalError(null);
-  }, [notifyChange]);
+  };
 
   return {
     dateStr,

@@ -2,7 +2,7 @@
 
 import { ko } from "date-fns/locale";
 import { AlertCircleIcon, CalendarIcon, XIcon } from "lucide-react";
-import { forwardRef, useId, useMemo } from "react";
+import { forwardRef, useId } from "react";
 
 import { Button, buttonVariants } from "@/shared/ui/button";
 import { Calendar } from "@/shared/ui/calendar";
@@ -59,13 +59,7 @@ const InputDatepicker = forwardRef<HTMLInputElement, InputDatepickerProps>(
     const inputId = id ?? generatedId;
     const errorId = `${inputId}-error`;
 
-    // 호출부가 new Date()를 인라인으로 넘겨도 참조가 흔들리지 않게 고정한다
-    const fromTime = fromDate.getTime();
-    const toTime = toDate.getTime();
-    const bounds = useMemo<DateBounds>(
-      () => ({ fromDate: new Date(fromTime), toDate: new Date(toTime) }),
-      [fromTime, toTime],
-    );
+    const bounds: DateBounds = { fromDate, toDate };
 
     const {
       error: internalError,
@@ -86,11 +80,7 @@ const InputDatepicker = forwardRef<HTMLInputElement, InputDatepickerProps>(
             {label}
           </Label>
         )}
-        <div
-          className={datepickerVariants({ error: hasError, disabled })}
-          aria-invalid={hasError}
-          aria-describedby={showErrorMessage ? errorId : undefined}
-        >
+        <div className={datepickerVariants({ error: hasError, disabled })}>
           <Popover>
             <PopoverTrigger
               disabled={disabled}
@@ -115,6 +105,7 @@ const InputDatepicker = forwardRef<HTMLInputElement, InputDatepickerProps>(
               <Calendar
                 locale={ko}
                 mode="single"
+                autoFocus
                 selected={value}
                 defaultMonth={value}
                 onSelect={handleCalendarSelect}
