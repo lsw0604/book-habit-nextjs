@@ -22,6 +22,11 @@ const DATE_FORMATS = {
 
 type DateFormatKey = keyof typeof DATE_FORMATS;
 
+/** 날짜 문자열을 키로 아이템 배열을 담는 그룹. `groupItemsByDate`의 반환 타입. */
+export interface GroupType<T> {
+  [date: string]: T[];
+}
+
 interface DurationPart {
   value: string;
   unit: "시간" | "분";
@@ -104,6 +109,59 @@ export const formatDate = (
     return "날짜 변환 오류";
   }
 };
+
+/**
+ * 날짜별 그룹의 키를 만듭니다. **로컬 시각 기준** 'yyyy-MM-dd'입니다.
+ *
+ * ⚠️ `date.toISOString().slice(0, 10)`으로 키를 만들면 안 됩니다. 그건 UTC
+ * 기준이라 KST(+9)에서는 하루 중 9시간이 전날로 밀립니다. 사용자가 1월 3일
+ * 00:00(KST)에 남긴 기록은 UTC로 1월 2일이라 2일 칸에 붙어버립니다.
+ *
+ * `ActivityCalendar`가 셀을 찾을 때도 이 함수를 씁니다. 키를 만드는 쪽과
+ * 찾는 쪽이 갈라지면 데이터가 예외 없이 조용히 사라지므로, 키는 반드시
+ * 이 함수를 거쳐 만듭니다.
+ */
+export const toDateKey = (date: Date | number): string =>
+  format(date, DATE_FORMATS.short);
+
+/**
+ * `date` 속성을 가진 객체들의 배열을 날짜별로 그룹화합니다.
+ * 키는 `toDateKey`가 만드는 로컬 기준 'yyyy-MM-dd' 문자열입니다.
+ *
+ * 반환 타입은 `ActivityCalendar`의 `data` prop(`ActivityCalendarData<T>`)에 그대로
+ * 넘길 수 있습니다.
+ *
+ * @template T - 배열의 아이템 타입. `date`라는 이름의 Date 속성을 가져야 합니다.
+ * @param items - 그룹화할 배열. 생략하거나 undefined면 빈 객체를 반환합니다.
+ * @returns 날짜 문자열을 키로, 그 날의 아이템 배열을 값으로 갖는 객체.
+ *
+ * @example
+ * ```typescript
+ * // 입력 시각은 전부 UTC지만, 키는 로컬(KST) 기준으로 만들어집니다.
+ * const data = [
+ *   { id: 1, value: 'a', date: new Date('2024-01-01T10:00:00Z') }, // KST 1/1 19:00
+ *   { id: 2, value: 'b', date: new Date('2024-01-01T12:00:00Z') }, // KST 1/1 21:00
+ *   { id: 3, value: 'c', date: new Date('2024-01-02T15:00:00Z') }, // KST 1/3 00:00 ← 날짜가 넘어감
+ * ];
+ *
+ * groupItemsByDate(data);
+ * // {
+ * //   '2024-01-01': [{ id: 1, ... }, { id: 2, ... }],
+ * //   '2024-01-03': [{ id: 3, ... }],
+ * // }
+ * ```
+ */
+export function groupItemsByDate<T extends { date: Date }>(
+  items: readonly T[] = [],
+): GroupType<T> {
+  return items.reduce<GroupType<T>>((acc, item) => {
+    const dateKey = toDateKey(item.date);
+
+    (acc[dateKey] ??= []).push(item);
+
+    return acc;
+  }, {});
+}
 
 /**
  * 숫자 형태의 총 분(minutes)을 'X시간 Y분' 형식의 문자열로 변환합니다.
