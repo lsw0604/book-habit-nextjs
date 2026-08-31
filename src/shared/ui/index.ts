@@ -7,6 +7,7 @@ export * from "./field";
 export * from "./form-input";
 export * from "./input";
 export * from "./label";
+export * from "./password-input";
 export * from "./popover";
 export * from "./separator";
 export * from "./skeleton";
