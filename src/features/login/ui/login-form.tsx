@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { type Control, Controller } from "react-hook-form";
-import { useState, useSyncExternalStore } from "react";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useSyncExternalStore } from "react";
 
 import {
   Button,
@@ -11,6 +10,7 @@ import {
   Separator,
   FormInput,
   FieldGroup,
+  PasswordInput,
 } from "@/shared/ui";
 import { isAPIError } from "@/shared/api";
 
@@ -108,25 +108,14 @@ function EmailField({ control }: { control: Control<LoginType> }) {
 }
 
 function PasswordField({ control }: { control: Control<LoginType> }) {
-  const [visible, setVisible] = useState<boolean>(false);
-
-  const onTogglePasswordVisibility = () => {
-    setVisible((prev) => !prev);
-  };
-
   return (
     <Controller
       name="password"
       control={control}
       render={({ field, formState: { errors } }) => (
-        <FormInput
+        <PasswordInput
           id="password"
-          type={visible ? "text" : "password"}
           label="비밀번호"
-          icon={visible ? EyeIcon : EyeOffIcon}
-          iconPosition="right"
-          onIconClick={onTogglePasswordVisibility}
-          iconLabel={visible ? "비밀번호 숨기기" : "비밀번호 표시"}
           error={errors.password?.message}
           {...field}
         />
