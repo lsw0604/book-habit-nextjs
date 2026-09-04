@@ -27,7 +27,8 @@ export function BookCardThumbnail({
   return (
     <div
       className={cn(
-        "relative size-full shrink-0 overflow-hidden rounded-lg bg-muted",
+        // DESIGN.md ④ Radius: 책 표지 썸네일은 rounded-[4px]다(rounded-lg 8px는 버튼·인풋).
+        "relative size-full shrink-0 overflow-hidden rounded-[4px] bg-muted",
         className,
       )}
       {...props}

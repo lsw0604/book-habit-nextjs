@@ -4,18 +4,26 @@ import type { BookDetail, BookSummary } from "../model";
 import {
   formatAuthor,
   formatDescription,
-  formatISBN,
   formatPubDate,
   formatTotalPage,
   formatTranslator,
+  normalizeIdentifier,
 } from "./book.formatter";
 
 export const toDetailBookViewModel = (dto: BookDetailDTO): BookDetail => {
-  const { isbn, pubDate, authors, translators, description, totalPage, ...rest } = dto;
+  const {
+    isbn,
+    pubDate,
+    authors,
+    translators,
+    description,
+    totalPage,
+    ...rest
+  } = dto;
 
   return {
     ...rest,
-    isbn: formatISBN(isbn),
+    identifier: normalizeIdentifier(isbn),
     pubDate: formatPubDate(pubDate),
     authors: formatAuthor(authors),
     translators: formatTranslator(translators),
@@ -29,7 +37,7 @@ export const toSummaryBookViewModel = (dto: BookSummaryDTO): BookSummary => {
 
   return {
     ...rest,
-    isbn: formatISBN(isbn),
+    identifier: normalizeIdentifier(isbn),
     pubDate: formatPubDate(pubDate),
     authors: formatAuthor(authors),
     translators: formatTranslator(translators),
