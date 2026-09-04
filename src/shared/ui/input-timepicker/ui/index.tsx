@@ -1,3 +1,5 @@
+"use client";
+
 import { ClockIcon } from "lucide-react";
 import { forwardRef, useId, useImperativeHandle, useRef } from "react";
 
