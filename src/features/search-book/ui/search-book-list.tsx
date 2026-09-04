@@ -1,23 +1,21 @@
 "use client";
 
-import {
-  AlertTriangleIcon,
-  RotateCcwIcon,
-  SearchIcon,
-  SearchXIcon,
-} from "lucide-react";
+import { AlertTriangleIcon, RotateCcwIcon, SearchXIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { BookCard } from "@/entities/book";
+import { BookCard, useRecentBooks } from "@/entities/book";
+import type { BookIdentifier } from "@/entities/book";
 import { useInfiniteScroll, useQueryParams } from "@/shared/hooks";
 import { cn } from "@/shared/lib";
-import { Button, EmptyState, Skeleton } from "@/shared/ui";
+import { Badge, Button, EmptyState, Skeleton } from "@/shared/ui";
 
 import { useSearchBook } from "../hooks";
 import { DEFAULT_SEARCH_BOOK_PARAMS, searchBookParamsSchema } from "../model";
 
-const INITIAL_SKELETON_ROWS = 4;
+import { SearchBookRecent } from "./search-book-recent";
+
+const INITIAL_SKELETON_ROWS = 7;
 const NEXT_PAGE_SKELETON_ROWS = 2;
 
 export function SearchBookList() {
@@ -39,18 +37,13 @@ export function SearchBookList() {
     refetch,
   } = useSearchBook(params);
   const ref = useInfiniteScroll(fetchNextPage, hasNextPage, {});
+  const { trackBook } = useRecentBooks();
 
   // 검색어가 없는 상태를 isPending보다 **먼저** 거른다. useSearchBook이
   // `enabled: Boolean(params.query)`로 쿼리를 멈춰두는데, 멈춘 쿼리는
   // isPending이 true로 남는다. 순서를 바꾸면 검색 전 화면에 스켈레톤이 영원히 돈다.
   if (!params.query) {
-    return (
-      <EmptyState
-        icon={SearchIcon}
-        title="책을 검색해 보세요"
-        description="제목·저자·출판사·ISBN으로 찾을 수 있어요. 필터에서 검색 대상과 정렬을 바꿀 수 있습니다."
-      />
-    );
+    return <SearchBookRecent />;
   }
 
   if (isPending) {
@@ -102,20 +95,46 @@ export function SearchBookList() {
         isPlaceholderData && "opacity-60",
       )}
     >
-      {data.map((book, index) => (
-        <li key={book.isbn || `${book.title}-${index}`} className="min-w-0">
-          {book.isbn ? (
-            <Link
-              href={`/search/${book.isbn}?${searchParams.toString()}`}
-              className="block rounded-lg transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-              <BookCard book={book} />
-            </Link>
-          ) : (
-            <BookCard book={book} />
-          )}
-        </li>
-      ))}
+      {/*
+       * 식별자를 읽지 못한 책이 섞여 있어 key fallback이 필요하다. index를 써도
+       * 안전한 건 이 목록이 append-only이기 때문이다 — selector가 중복을 앞에서부터
+       * 걷어내므로 페이지가 늘어나도 앞쪽 인덱스는 밀리지 않는다.
+       */}
+      {data.map((book, index) => {
+        // 좁힌 타입을 클로저(onClick)까지 들고 가려면 지역 변수로 뽑아야 한다.
+        const { identifier } = book;
+
+        return (
+          <li
+            key={identifier?.value ?? `${book.title}-${index}`}
+            className="min-w-0"
+          >
+            {identifier?.type === "ISBN" ? (
+              <Link
+                href={`/search/${identifier.value}?${searchParams.toString()}`}
+                onClick={() =>
+                  trackBook({
+                    identifier,
+                    title: book.title,
+                    authors: book.authors,
+                    publisher: book.publisher,
+                    pubDate: book.pubDate,
+                    thumbnail: book.thumbnail,
+                  })
+                }
+                className="block rounded-lg transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                <BookCard book={book} />
+              </Link>
+            ) : (
+              <BookCard
+                book={book}
+                trailing={<UnavailableBadge identifier={identifier} />}
+              />
+            )}
+          </li>
+        );
+      })}
 
       {isFetchingNextPage ? (
         <ResultRowSkeletons count={NEXT_PAGE_SKELETON_ROWS} />
@@ -127,6 +146,35 @@ export function SearchBookList() {
        */}
       <li ref={ref} aria-hidden className="h-4 shrink-0" />
     </ul>
+  );
+}
+
+/**
+ * 상세로 갈 수 없는 이유를 로우 오른쪽에 남긴다.
+ *
+ * 링크를 안 거는 것만으로는 "왜 이 책만 눌러도 반응이 없지?"가 된다. hover 배경이
+ * 없는 것과 이 배지가 함께 신호가 된다.
+ *
+ * ISSN(잡지)과 "식별자를 못 읽음"을 구분하는 이유는 사용자가 할 수 있는 일이 다르기
+ * 때문이다 — 잡지는 애초에 이 서비스가 다루지 않는 것이고, 후자는 데이터 문제다.
+ * 배지에는 짧은 라벨만 두고 이유는 스크린리더에 싣는다.
+ */
+function UnavailableBadge({
+  identifier,
+}: {
+  identifier: BookIdentifier | null;
+}) {
+  const isSerial = identifier?.type === "ISSN";
+
+  return (
+    <Badge variant="outline">
+      {isSerial ? "잡지" : "정보 없음"}
+      <span className="sr-only">
+        {isSerial
+          ? " · 정기간행물이라 상세 정보를 볼 수 없습니다"
+          : " · 식별자가 없어 상세 정보를 볼 수 없습니다"}
+      </span>
+    </Badge>
   );
 }
 
