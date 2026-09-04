@@ -41,6 +41,19 @@ export class APIError extends Error {
     return this.kind === "canceled";
   }
 
+  /**
+   * 화면에 그대로 띄워도 되는 문구.
+   *
+   * `network`·`timeout`은 이 클래스가 만든 사용자용 문구지만, `server`·`unknown`의
+   * `message`는 BE 원문(검증 실패 메시지가 `, `로 이어진 문자열 등)이라 그대로
+   * 노출하면 화면에 개발자용 텍스트가 새어 나간다. 원문은 로깅용으로 `message`에 남긴다.
+   */
+  get userMessage(): string {
+    return this.kind === "network" || this.kind === "timeout"
+      ? this.message
+      : "잠시 후 다시 시도해 주세요.";
+  }
+
   static network(cause?: unknown): APIError {
     return new APIError(
       "서버에 연결할 수 없습니다.\n네트워크 상태를 확인해주세요.",
