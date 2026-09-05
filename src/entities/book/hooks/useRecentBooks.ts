@@ -24,6 +24,15 @@ export function useRecentBooks() {
   const [stored, setStored] = useLocalStorage<RecentBook[]>(
     RECENT_BOOKS_STORAGE_KEY,
     [],
+    /*
+     * SSR 필수 옵션. 기본값(`true`)은 첫 렌더에서 곧바로 localStorage를 읽는데,
+     * 서버에는 그게 없어 서버는 빈 목록을, 클라이언트는 저장된 목록을 그린다.
+     * 그 차이가 하이드레이션 불일치로 잡힌다.
+     *
+     * `false`면 첫 렌더가 양쪽 모두 `initialValue`로 맞고, 마운트 뒤에 실제 값으로
+     * 바뀐다. 최근 본 책은 한 박자 늦게 나타나도 되는 정보라 이 지연이 문제가 없다.
+     */
+    { initializeWithValue: false },
   );
 
   const books = useMemo(
