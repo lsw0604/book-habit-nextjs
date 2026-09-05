@@ -8,8 +8,8 @@
 
 - **토큰**: 컬러·elevation·radius 전부 `globals.css`에 구현 완료.
 - **다크 테마**: 변수는 `.dark`에 정의됐지만 클래스를 붙이는 토글이 아직 없다 → 현재는 라이트만 렌더링된다. 그래도 신규 코드는 다크 대비를 항상 함께 검증한다.
-- **구현된 컴포넌트** (`src/shared/ui/`): Button, Input, Textarea, FormInput, FormSelect, PasswordInput, Checkbox, Switch, RadioGroup, Label, Field, Separator, Avatar, Skeleton, Tooltip, Calendar, ActivityCalendar, InputDatepicker, InputTimepicker, Card, Select, Popover, EmptyState, Badge.
-- **미구현**: Toast, Modal, Progress, 연간 Streak Heatmap, Feed Item 등 → ④의 **신규 컴포넌트 파생 규칙**을 따라 만든다.
+- **구현된 컴포넌트** (`src/shared/ui/`): Button, Input, Textarea, FormInput, FormSelect, PasswordInput, Checkbox, Switch, RadioGroup, Label, Field, Separator, Avatar, Skeleton, Tooltip, Calendar, ActivityCalendar, InputDatepicker, InputTimepicker, Card, Select, Popover, EmptyState, Badge, Progress, Thumbnail.
+- **미구현**: Toast, Modal, 연간 Streak Heatmap, Feed Item 등 → ④의 **신규 컴포넌트 파생 규칙**을 따라 만든다.
 
 ---
 
@@ -157,6 +157,12 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 - **여러 개를 나열할 때는 기본값을 `outline`, 사용자가 바꾼 값만 `highlight`로 둔다.** 그래야 블루가 "여기가 달라졌다"는 신호로 남는다. 전부 칠하면 강조가 사라진다.
 - `highlight`의 글자가 `text-primary`가 아닌 이유는 **대비**다. 라이트에서 `--primary`(#2196F3)는 흰 배경 대비 약 3:1이라 Micro 12px에는 WCAG AA(4.5:1)에 못 미친다. `--title`(#0D47A1)은 12:1이고, `--secondary-foreground` 주석이 지목하는 "배지 텍스트" 값이 정확히 이것이다.
 - 배지만으로 뜻이 통하지 않으면(예: "10개"가 무엇의 10개인지) 항목 이름을 `sr-only`로 함께 싣는다. 시각적으로는 값만 두되 스크린리더에는 온전한 문장이 읽혀야 한다.
+
+**Progress** — 진행률 바. 트랙 `bg-muted` + 채움 `bg-primary` + `rounded-full`, 높이 `h-1`(4px). 폭 전환은 ⑤ Motion의 기본 트랜지션(150ms)을 쓴다.
+
+- `role="progressbar"` + `aria-valuenow/min/max`를 항상 싣고, **`label`로 무엇의 진행인지 밝힌다.** 바만으로는 스크린리더가 "62%"까지만 읽는다.
+- **값이 "없음"이면 0으로 그리지 말고 호출부에서 바를 통째로 뺀다.** 빈 바는 "0% 진행"으로 읽혀 거짓말이 된다("총 페이지를 모르는 책"과 "아직 안 읽은 책"은 다르다).
+- 옆에 수치를 함께 둘 때는 ⑦에 따라 `font-mono`를 쓴다.
 
 **EmptyState** — 리스트·상세 패널이 보여줄 게 없을 때 그 자리를 채우는 상태 화면. 검색 전 안내, 결과 0건, 조회 실패, 항목 미선택이 **전부 같은 뼈대**를 쓴다 — 화면마다 정렬·아이콘 유무가 달라지면 사용자가 같은 상황을 다른 화면으로 오인한다.
 
