@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { BookCardThumbnail } from "./book-card-thumbnail";
+import { Thumbnail } from "@/shared/ui";
 
 import type { BookSummary } from "../model";
 
@@ -33,7 +33,7 @@ export function BookCard({ book, trailing }: BookCardProps) {
   return (
     <div className="flex w-full min-w-0 items-center gap-3 p-2">
       <div className="h-16 w-11 shrink-0">
-        <BookCardThumbnail src={book.thumbnail} alt={`${book.title} 표지`} />
+        <Thumbnail src={book.thumbnail} alt={`${book.title} 표지`} />
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
         <h3 className="truncate text-base font-semibold text-title">
