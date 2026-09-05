@@ -80,7 +80,7 @@
   --foreground: #333333; /* text.primary */
   --title: #0d47a1; /* text.title */
 
-  --card: #e3f2fd; /* background.surface */
+  --card: #f5f5f5; /* background.surface — muted와 동일 톤(gray100). primary는 버튼·배지 전용, 카드 배경엔 안 쓴다 */
   --card-foreground: #333333;
   --popover: #ffffff;
   --popover-foreground: #333333;

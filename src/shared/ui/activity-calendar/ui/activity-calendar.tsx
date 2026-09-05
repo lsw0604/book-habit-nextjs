@@ -39,12 +39,9 @@ export function ActivityCalendar<T>({
       className={cn(
         "rounded-xl border border-border p-4 shadow-elevation-1 md:p-6",
         /*
-         * 지면은 라이트에서 흰색이다. `bg-card`(#E3F2FD)는 흰 바탕 위
-         * primary 약 14%와 같은 색이라, 잔디 램프(1단계가 25%) 안쪽에
-         * 들어와 빈 날이 '조금 기록한 날'처럼 보인다. 다크는 지면이
-         * 램프의 최저점이라 그 혼동이 없고, ⑥의 계층 규칙상 페이지보다
-         * 한 단계 밝은 서피스가 필요하므로 `bg-card`를 유지한다.
-         * 카드 경계는 border와 elevation이 맡는다.
+         * ⑥의 계층 규칙상 다크는 그림자만으론 계층이 안 드러나 bg-card로
+         * 서피스를 한 단계 밝혀야 하지만, 라이트는 흰 배경 위 elevation
+         * shadow만으로 충분하다. 카드 경계는 border와 elevation이 맡는다.
          */
         "bg-background dark:bg-card",
         className,

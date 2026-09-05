@@ -92,16 +92,7 @@ const InputDatepicker = forwardRef<HTMLInputElement, InputDatepickerProps>(
             >
               <CalendarIcon size={16} className="text-muted-foreground" />
             </PopoverTrigger>
-            {/*
-             * ActivityCalendar와 같은 이유로 라이트에서는 bg-card 대신 bg-background를 쓴다:
-             * bg-card는 primary 계열이라 선택 표시(bg-primary)와 뒤섞인다.
-             * 다크는 지면이 색 램프의 최저점이라 그 혼동이 없고 ⑥의 계층 규칙상
-             * 페이지보다 밝은 서피스가 필요하므로 bg-card를 유지한다.
-             */}
-            <PopoverContent
-              align="start"
-              className="w-auto bg-background p-2 dark:bg-card"
-            >
+            <PopoverContent align="start" className="w-auto p-2">
               <Calendar
                 locale={ko}
                 mode="single"
