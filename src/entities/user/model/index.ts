@@ -1,2 +1,2 @@
 export * from "./user.model";
-export * from "./auth-events";
+export * from "./auth-transition";

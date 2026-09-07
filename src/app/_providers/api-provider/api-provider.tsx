@@ -8,7 +8,7 @@ import {
   authClient,
   setupApiResponseInterceptor,
 } from "@/shared/api";
-import { authEvents } from "@/entities/user";
+import { notifySessionExpired } from "@/entities/user";
 
 /*
  * 인터셉터를 모듈 스코프에서 등록한다.
@@ -27,10 +27,9 @@ if (typeof window !== "undefined") {
     // 실패를 catch해야 하는데, 이벤트는 발행하고 잊는 구조라 그걸 못 한다.
     refreshFn: () => authClient.post<void>(API_ENDPOINTS.AUTH.REFRESH),
 
-    // 반대로 "세션이 끝났다"는 알리기만 하면 되므로 이벤트로 넘긴다.
-    // 무엇을 할지(캐시 비우기·리다이렉트)는 `AuthProvider`가 정한다.
-    onRefreshFailed: (reason) =>
-      authEvents.emit("auth:session-expired", { reason }),
+    // 반대로 "세션이 끝났다"는 알리기만 하면 된다. 무엇을 할지
+    // (캐시 비우기·리다이렉트)는 `AuthProvider`가 정한다.
+    onRefreshFailed: notifySessionExpired,
   });
 }
 
