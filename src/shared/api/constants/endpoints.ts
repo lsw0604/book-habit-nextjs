@@ -1,5 +1,6 @@
 /**
- * BE 엔드포인트 경로. 명세(http://localhost:3000/api-json)의 31개 경로와 1:1로 맞춘다.
+ * BE 엔드포인트 경로. 명세(http://localhost:3000/api-json)의 32개 경로와 1:1로 맞춘다.
+ * (명세의 33개 중 카카오 콜백은 FE가 호출하지 않아 상수를 두지 않는다.)
  *
  * 식별자가 들어가는 경로는 함수로 둔다.
  */
@@ -24,6 +25,11 @@ export const API_ENDPOINTS = {
   },
   MY_BOOK: {
     ROOT: "/api/my-book",
+    /**
+     * ISBN으로 내 서재 등록 여부를 묻는다. 하이픈이 있어도 되고 BE가 ISBN-13으로
+     * 정규화한다. **없으면 404가 아니라 200 + `data: null`이다.**
+     */
+    BY_ISBN: (isbn: string) => `/api/my-book/by-isbn/${isbn}`,
     BY_ID: (id: number) => `/api/my-book/${id}`,
   },
   READING_LOG: {
