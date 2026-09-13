@@ -30,8 +30,7 @@ const badgeVariants = cva(
         outline: "border-border text-muted-foreground",
         /** 배경 없이 글자를 물들인다. 표시 전용 배지의 강조. */
         highlight: "border-secondary text-title",
-        success: "bg-success text-primary-foreground",
-        warning: "bg-warning text-primary-foreground",
+        /** 되돌릴 수 없는 상태 표시 전용. 팔레트의 유일한 비블루(DESIGN.md ②). */
         destructive: "bg-destructive text-primary-foreground",
       },
     },

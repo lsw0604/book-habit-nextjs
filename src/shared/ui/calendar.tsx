@@ -12,6 +12,18 @@ import { cn } from "@/shared/lib/utils"
 import { Button, buttonVariants } from "@/shared/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
 
+/**
+ * DESIGN.md ④ Calendar 규정에 맞춰 shadcn 기본값을 수정했다.
+ *
+ * `shadcn add calendar`로 재설치하면 덮어써진다. 그때 다시 적용할 항목:
+ *
+ * - 날짜 버튼에 `text-inherit`: 이 레포의 `ghost` variant는 `text-primary`(DESIGN.md ④ Button)라
+ *   shadcn 원본대로 두면 **모든 날짜가 파랗게** 칠해지고, 셀(`<td>`)에 걸어둔
+ *   outside/today/disabled 색이 전부 버튼에 가려진다
+ * - 루트에 `text-foreground`: 날짜 기본색이 부모(팝오버·카드)에 따라 흔들리지 않게 고정
+ * - `outside`에 `opacity-50`: 주말과 같은 `text-muted-foreground`라 한 단계 더 물러나야 구분된다
+ * - `weekend` modifier 주입: 주말을 `text-muted-foreground`로(ActivityCalendar와 같은 규칙)
+ */
 function Calendar({
   className,
   classNames,
@@ -21,6 +33,8 @@ function Calendar({
   locale,
   formatters,
   components,
+  modifiers,
+  modifiersClassNames,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
@@ -31,13 +45,22 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "group/calendar bg-background p-2 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(7)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+        "group/calendar bg-background text-foreground p-2 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(7)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
       )}
       captionLayout={captionLayout}
       locale={locale}
+      /*
+       * 주말을 요일 인덱스로 잡는다. `nth-child`로 열을 세면 `weekStartsOn`이
+       * 바뀌는 순간 조용히 어긋난다(ko 로케일은 일요일 시작이지만 로케일마다 다르다).
+       */
+      modifiers={{ weekend: { dayOfWeek: [0, 6] }, ...modifiers }}
+      modifiersClassNames={{
+        weekend: "text-muted-foreground",
+        ...modifiersClassNames,
+      }}
       formatters={{
         formatMonthDropdown: (date) =>
           date.toLocaleString(locale?.code, { month: "short" }),
@@ -123,7 +146,7 @@ function Calendar({
           defaultClassNames.today
         ),
         outside: cn(
-          "text-muted-foreground aria-selected:text-muted-foreground",
+          "text-muted-foreground opacity-50 aria-selected:text-muted-foreground",
           defaultClassNames.outside
         ),
         disabled: cn(
@@ -209,7 +232,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        "relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
+        "relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal text-inherit group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,
         className
       )}

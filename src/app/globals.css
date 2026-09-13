@@ -22,10 +22,9 @@
 
   /* DESIGN.md에 있으나 shadcn에 대응 슬롯이 없는 토큰 */
   --color-title: var(--title);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
   --color-primary-hover: var(--primary-hover); /* action.primaryHover */
   --color-disabled: var(--disabled); /* action.disabled */
+  --color-backdrop: var(--backdrop); /* 모달 딤 — DESIGN.md ④ AlertDialog */
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -97,9 +96,12 @@
   --accent: #e3f2fd; /* hover 배경 = background.surface */
   --accent-foreground: #0d47a1;
 
-  --success: #2e7d32;
-  --warning: #f9a825;
-  --destructive: #c62828; /* Danger */
+  /*
+   * 팔레트에서 블루가 아닌 유일한 색(rose.600). Success/Warning 토큰은 두지 않는다 — 근거는
+   * DESIGN.md ②. 흰 배경 대비 4.70:1로 FieldError(Small 14px)와 버튼 위 흰 글자를 모두 통과하는
+   * 첫 rose 단계다(rose.500은 3.67:1로 미달).
+   */
+  --destructive: #e11d48; /* Danger — rose.600 */
 
   --border: #e0e0e0; /* border.default */
   --input: #e0e0e0;
@@ -109,6 +111,13 @@
   --shadow-elevation-2: 0 4px 8px rgba(0, 0, 0, 0.1);
   --shadow-elevation-3: 0 8px 16px rgba(0, 0, 0, 0.14);
   --shadow-elevation-4: 0 16px 32px rgba(0, 0, 0, 0.18);
+
+  /*
+   * 모달 딤. 다크가 더 짙은 이유는 elevation과 같다 — 흰 지면 위에서는 40%만
+   * 깔아도 뒤가 확실히 물러나지만, #121418 위에 같은 값을 얹으면 경계가
+   * 거의 드러나지 않는다.
+   */
+  --backdrop: rgba(0, 0, 0, 0.4);
 
   /*
    * DESIGN.md는 버튼 8px / 카드 12px를 요구하는데 shadcn은 --radius 하나에서
@@ -149,7 +158,14 @@
   --primary: #90caf9;
   --primary-foreground: #121418; /* text.inverse */
   --primary-hover: #2196f3; /* action.primaryHover */
-  --disabled: #757575; /* action.disabled */
+  /*
+   * 라이트의 action.disabled(#E0E0E0)는 gray500(text.secondary, #757575)보다
+   * 밝아 배경·글자가 갈린다. 다크에서 그대로 #757575를 쓰면 disabled 배경과
+   * `--muted-foreground`(마찬가지로 #757575)가 같은 값이 되어 버튼 위 아이콘·
+   * 라벨이 배경에 파묻혀 안 보인다. darkScale.surface(#1E232B, --card/--muted와
+   * 동일)로 가라앉혀 라이트와 같은 관계(배경 ≠ 글자색)를 다크에서도 지킨다.
+   */
+  --disabled: #1e232b; /* action.disabled */
   --secondary: #0d47a1;
   --secondary-foreground: #e3f2fd;
 
@@ -165,9 +181,8 @@
   --accent: #1e232b;
   --accent-foreground: #e3f2fd;
 
-  --success: #66bb6a;
-  --warning: #ffca28;
-  --destructive: #ef5350;
+  /* --primary와 같은 이유로 한 단계 밝힌다. #121418 대비 9.75:1. */
+  --destructive: #fda4af; /* Danger — rose.300 */
 
   --border: #757575;
   --input: #757575;
@@ -177,6 +192,8 @@
   --shadow-elevation-2: 0 4px 8px rgba(0, 0, 0, 0.5);
   --shadow-elevation-3: 0 8px 16px rgba(0, 0, 0, 0.55);
   --shadow-elevation-4: 0 16px 32px rgba(0, 0, 0, 0.6);
+
+  --backdrop: rgba(0, 0, 0, 0.6);
 
   --chart-1: #90caf9;
   --chart-2: #2196f3;

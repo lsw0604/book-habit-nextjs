@@ -4,12 +4,12 @@
 > 이 문서의 모든 값은 `src/app/globals.css`에 CSS 변수로 구현되어 있다.
 > 각 표의 **CSS 변수 / 클래스** 열이 코드와의 계약이다. 컴포넌트는 HEX가 아니라 그 클래스를 쓴다.
 
-### 구현 현황 (2026-09-04)
+### 구현 현황 (2026-09-13)
 
 - **토큰**: 컬러·elevation·radius 전부 `globals.css`에 구현 완료.
 - **다크 테마**: 변수는 `.dark`에 정의됐지만 클래스를 붙이는 토글이 아직 없다 → 현재는 라이트만 렌더링된다. 그래도 신규 코드는 다크 대비를 항상 함께 검증한다.
-- **구현된 컴포넌트** (`src/shared/ui/`): Button, Input, Textarea, FormInput, FormSelect, PasswordInput, Checkbox, Switch, RadioGroup, Label, Field, Separator, Avatar, Skeleton, Tooltip, Calendar, ActivityCalendar, InputDatepicker, InputTimepicker, Card, Select, Popover, EmptyState, Badge, Progress, Thumbnail.
-- **미구현**: Toast, Modal, 연간 Streak Heatmap, Feed Item 등 → ④의 **신규 컴포넌트 파생 규칙**을 따라 만든다.
+- **구현된 컴포넌트** (`src/shared/ui/`): Button, Input, Textarea, FormInput, FormSelect, PasswordInput, Checkbox, Switch, RadioGroup, Label, Field, Separator, Avatar, Skeleton, Tooltip, Calendar, ActivityCalendar, InputDatepicker, InputTimepicker, Card, Select, Popover, AlertDialog, EmptyState, Badge, Progress, Thumbnail.
+- **미구현**: Toast, 연간 Streak Heatmap, Feed Item 등 → ④의 **신규 컴포넌트 파생 규칙**을 따라 만든다.
 
 ---
 
@@ -27,9 +27,16 @@
 
 ```
 blue.50 #E3F2FD · blue.200 #90CAF9 · blue.500 #2196F3 · blue.900 #0D47A1
+rose.300 #FDA4AF · rose.600 #E11D48
 darkScale.bg #121418 · darkScale.surface #1E232B
 gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 ```
+
+**이 팔레트는 블루 4단계 + 뉴트럴이 전부고, 예외색은 rose 하나다.** Success(초록)·Warning(노랑)
+같은 상태색 세트를 두지 않는다 — 이 제품에는 경고할 일이 없고("아직 안 읽음"은 경고가 아니다),
+완료·성공은 ①의 "조용한 동기부여"에 따라 초록 배지가 아니라 블루 스케일(진행 바·잔디 음영·
+`highlight` 배지)이 표현한다. 색을 하나만 남기는 대신 그 하나는 선명하게 써서, 빨강이 보이면
+**오류 아니면 되돌릴 수 없는 액션**이라는 뜻이 되게 한다.
 
 **시맨틱 토큰 ↔ 코드** — 이 표가 정본이다.
 
@@ -46,17 +53,24 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 | 액션(기본)            | `--primary`            | `bg-primary` · `text-primary`           | `#2196F3` | `#90CAF9` |
 | 액션(hover)           | `--primary-hover`      | `hover:bg-primary-hover`                | `#0D47A1` | `#2196F3` |
 | 액션(보조)            | `--secondary`          | `bg-secondary`                          | `#90CAF9` | `#0D47A1` |
-| 액션(비활성)          | `--disabled`           | `disabled:bg-disabled`                  | `#E0E0E0` | `#757575` |
+| 액션(비활성)          | `--disabled`           | `disabled:bg-disabled`                  | `#E0E0E0` | `#1E232B` |
 | 보더(기본)            | `--border` · `--input` | `border-border` · `border-input`        | `#E0E0E0` | `#757575` |
 | 보더/링(포커스)       | `--ring`               | `focus-visible:border-ring` `ring-ring` | `#90CAF9` | `#2196F3` |
+| 모달 딤(backdrop)     | `--backdrop`           | `bg-backdrop`                           | `rgba(0,0,0,.4)` | `rgba(0,0,0,.6)` |
 
-**상태색 (Success / Warning / Danger)** — 스트릭·목표·폼 검증 전용.
+**예외색 (Danger)** — 폼 검증 오류와 파괴적 액션 **전용**. 팔레트에서 블루가 아닌 유일한 색이다.
 
-| 역할    | CSS 변수        | Tailwind 클래스                       | Light     | Dark      |
-| ------- | --------------- | ------------------------------------- | --------- | --------- |
-| Success | `--success`     | `text-success` · `bg-success`         | `#2E7D32` | `#66BB6A` |
-| Warning | `--warning`     | `text-warning` · `bg-warning`         | `#F9A825` | `#FFCA28` |
-| Danger  | `--destructive` | `text-destructive` · `bg-destructive` | `#C62828` | `#EF5350` |
+| 역할   | CSS 변수        | Tailwind 클래스                       | Light     | Dark      |
+| ------ | --------------- | ------------------------------------- | --------- | --------- |
+| Danger | `--destructive` | `text-destructive` · `bg-destructive` | `#E11D48` | `#FDA4AF` |
+
+> 다크가 더 **밝은** 이유는 `--primary`(blue.500 → blue.200)와 같다 — 어두운 지면에서는 색을
+> 한 단계 올려야 대비가 선다. 그래서 `bg-destructive` 위 텍스트는 라이트·다크 모두
+> `text-primary-foreground`다(다크에서는 그 값이 `#121418`로 뒤집힌다).
+>
+> 값 선택 근거는 대비다. 흰 배경 대비 rose.300은 1.89:1, rose.500은 3.67:1로 `FieldError`(Small
+> 14px, 4.5:1 필요)에 못 미친다. rose.600이 4.70:1로 텍스트·버튼·보더를 모두 통과하는 첫 단계다.
+> 다크에서는 `#121418` 대비 rose.300이 9.75:1이라 여유가 크다.
 
 **차트**: `--chart-1`~`--chart-5`가 블루 계열 + 중립으로 정의돼 있다(`chart-1`이 가장 강조). 통계 화면은 이 순서대로 쓴다.
 
@@ -64,6 +78,7 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 > 2. active(눌림) 토큰은 없다. `primary-hover`를 그대로 쓰거나 `opacity 85%`를 얹는다.
 > 3. `--muted` 다크값이 `blue.900`이 아닌 이유: muted는 스켈레톤·비활성처럼 **물러나는** 자리라 채도 높은 파랑이 역할을 뒤집는다. `blue.900`은 `--secondary`로 이미 노출돼 있다.
 > 4. `--card`가 라이트에서 `blue.50`이 아니라 `gray100`인 이유: primary/secondary는 버튼·배지처럼 사용자가 실제로 누르는 액션 표면과 hover/active 피드백(`--accent`) 전용이다. 카드처럼 화면에 늘 떠 있는 정적 서피스에 블루를 깔면 인터랙션 강조가 아니라 그냥 배경색이 되어 하이라이트로서의 의미가 사라진다. `--accent`는 hover라는 일시적 피드백이라 예외적으로 블루 톤(`blue.50`)을 유지한다.
+> 5. `--disabled` 다크값은 `gray500`(`#757575`)이 아니라 `darkScale.surface`(`#1E232B`, `--card`/`--muted`와 동일)다. `disabled:text-muted-foreground`도 같은 `gray500`이라, 그대로 두면 다크 모드 비활성 버튼의 배경과 글자가 같은 색이 되어 아이콘·라벨이 안 보인다(실측 확인: `MyBookButton`의 disabled 상태). 라이트는 `--disabled`(`#E0E0E0`)가 `--muted-foreground`(`#757575`)보다 밝아 이 문제가 없었다 — 다크도 배경을 표면 톤으로 가라앉혀 같은 관계(배경 ≠ 글자색)를 맞춘다.
 
 ---
 
@@ -132,12 +147,25 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 | `Skeleton`  | `bg-muted animate-pulse` (주기 1.5s)                                                                                                                                            |
 | `Tooltip`   | `z-50`(= z-tooltip), 반전 배경 `bg-foreground` + 화살표                                                                                                                         |
 
+**Calendar** — react-day-picker 기반 날짜 선택 그리드(`InputDatepicker`의 팝오버 내용물). 날짜 색은 **3단계 위계**로만 쓴다.
+
+| 대상                | 색                                     |
+| ------------------- | -------------------------------------- |
+| 이번 달 평일        | `text-foreground`                      |
+| 이번 달 주말        | `text-muted-foreground`                |
+| 다른 달(outside)    | `text-muted-foreground` + `opacity-50` |
+
+- 오늘은 `bg-muted`, 선택은 `bg-primary` + `text-primary-foreground`. **블루는 선택된 하루에만** 쓴다 — 모든 날짜가 파랗면 "고른 날"이 사라진다.
+- 날짜 버튼은 `ghost` Button으로 렌더링되는데 이 레포의 `ghost`는 `text-primary`다. 그래서 버튼에 **`text-inherit`을 반드시 걸어** 셀(`<td>`)의 색을 물려받게 한다. 안 그러면 위 3단계가 통째로 가려진다(실측 확인).
+- 주말 판정은 `dayOfWeek` modifier로 한다. `nth-child`로 열을 세면 `weekStartsOn`이 바뀔 때 조용히 어긋난다.
+- **일요일 빨강을 쓰지 않는다.** 한국 달력 관행이지만 ②가 `--destructive`를 오류·파괴적 액션 전용으로 못 박았고, 장식으로 넓히면 "빨강 = 위험"이라는 신호가 희석된다. 채택하려면 카카오 버튼처럼 ②에 별도 예외 조항을 먼저 세워야 한다.
+
 **ActivityCalendar** — 월 단위 활동 캘린더. 카드 껍데기는 `bg-card` + `rounded-xl` + `shadow-elevation-1` + `p-4 md:p-6`, 헤더 제목은 H2, 월 이동은 `size="icon"` 버튼 + 20px Chevron, 그리드는 `grid-cols-7 gap-1`에 요일 헤더 Micro + `text-muted-foreground`.
 
 - **지면**: 라이트에서 `bg-background`(흰색), 다크에서 `bg-card`. `--card`는 이제 라이트·다크 모두 뉴트럴 톤이라 잔디 램프(`bg-primary/25`~)와 색상 계열이 겹치지 않는다 — 이 비대칭은 색상 충돌 회피가 아니라 ⑥의 계층 규칙 때문이다: 다크는 그림자만으로 계층이 안 드러나서 `bg-card`로 서피스를 한 단계 밝혀야 하고, 라이트는 흰 배경 위 `shadow-elevation-1`만으로 카드 경계가 충분히 드러나 굳이 톤을 얹지 않는다. 카드 경계는 `border-border` + `shadow-elevation-1`이 맡는다. **차트·히트맵처럼 색으로 값을 인코딩하는 서피스는 인코딩 팔레트와 겹치지 않는 지면 색을 쓴다**는 원칙은 여전히 유효하다 — 인코딩색이 바뀌면 그때 이 지면 규칙도 같이 재검토한다. 이 캘린더를 `Popover`(오버레이 본체 규칙에 따라 기본 배경이 이미 `bg-background dark:bg-card`다) 안에 넣을 때도 이 비대칭이 그대로 이어진다 — `Calendar`는 `in-data-[slot=popover-content]:bg-transparent`로 부모 배경을 그대로 물려받으므로, 로컬 오버라이드 없이도 `input-datepicker` 같은 곳에서 지면 규칙이 자동으로 맞는다.
 - 날짜 숫자는 셀 좌측 상단(`top-1 left-1`, Micro 스케일)에 고정한다. 셀 콘텐츠가 달라도 날짜 위치가 같아야 한 달을 훑을 수 있다.
 - 날짜 셀의 겉 `<button>`은 포커스 링만 갖는다. **배경·비율·날짜 숫자는 `DayComponent`가 소유한다** — 잔디처럼 셀을 가득 칠하거나 책 표지로 채우려면 겉껍데기가 시각적 결정을 하면 안 된다.
-- **잔디(활동량 음영)**: `bg-muted` → `bg-primary/25` → `/50` → `/75` → `bg-primary` 5단계. `/75`부터 텍스트는 `text-primary-foreground`. Success를 쓰지 않는 이유는 ⑦(상태색은 상태 표시 전용)이다. 색만으로 정보를 주지 않도록 기록 개수를 `aria-label`에 싣는다.
+- **잔디(활동량 음영)**: `bg-muted` → `bg-primary/25` → `/50` → `/75` → `bg-primary` 5단계. `/75`부터 텍스트는 `text-primary-foreground`. 활동량이 많은 걸 초록으로 칠하지 않는 이유는 ②다 — 팔레트에 초록이 없고, 성취는 블루 스케일이 표현한다. 색만으로 정보를 주지 않도록 기록 개수를 `aria-label`에 싣는다.
 - **점(`ActivityDotDay`)**: 같은 개수를 `bg-primary` 점 개수로 인코딩한다(`size-1.5`, `gap-1`, 최대 3개). 셀을 칠하지 않아 지면 충돌이 없고 날짜 숫자에 반전이 필요 없다. 선택 표시는 채우기가 아니라 `ring-2 ring-ring` — `bg-primary`로 채우면 같은 색인 점이 사라진다. **"어느 주가 빽빽했나"를 스캔하려면 잔디, "이 날 몇 건인가"를 세려면 점**을 쓴다.
 - **주말**: `text-muted-foreground`로 물러난다. 일요일 빨강 같은 한국 달력 관행은 상태색을 장식에 쓰는 것이라, 채택하려면 카카오 버튼처럼 별도 예외 조항이 필요하다.
 
@@ -148,7 +176,7 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 | `secondary` (기본)                    | `bg-secondary text-secondary-foreground` | **클릭 가능한** 배지 (액션 표면)      |
 | `outline`                             | `border-border text-muted-foreground`    | 강조하지 않는 중립 값(기본값 표시 등) |
 | `highlight`                           | `border-secondary text-title`            | 표시 전용 배지의 강조                 |
-| `success` · `warning` · `destructive` | 각 상태색 + `text-primary-foreground`    | 상태 표시 전용(⑦)                     |
+| `destructive`                         | `bg-destructive text-primary-foreground` | 되돌릴 수 없는 상태 표시 전용(②)      |
 
 **배경을 채우는 배지 vs 글자만 물들이는 배지** — ⑦은 배지 색을 `bg-secondary`나 상태색으로 제한하면서, 같은 절에서 블루 배경을 "**조작하는** 표면과 일시적 피드백"에만 허용한다. 두 조항이 만나는 지점이 여기다.
 
@@ -175,6 +203,20 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 - **`variant="error"`**: **아이콘만** `text-destructive`로 물들인다(⑦ — 상태색은 배경 장식이 아니다). 아이콘이 구조적으로 항상 함께 있어 "상태색은 아이콘·라벨과 함께" 규정이 자동으로 지켜진다.
 - **액션**: children 슬롯에 Button `variant="ghost" size="sm"` + 16px 아이콘. 빈 화면의 액션은 권유지 요구가 아니라서 `outline`의 테두리조차 얹지 않는다. 재시도는 파괴적 액션이 아니므로 `destructive`를 쓰지 않는다.
 
+**AlertDialog** — 되돌릴 수 없는 액션의 확인 창. `@base-ui/react`의 **AlertDialog**를 쓴다(Dialog가 아니다) — **바깥(딤) 클릭으로 닫히지 않고**(`disablePointerDismissal`이 강제라 prop으로 되돌릴 수 없다) `role="alertdialog"`로 읽힌다. **ESC는 닫힌다** — 키보드 탈출구는 남겨야 하고, 딤 클릭과 달리 의도 없이 눌리지 않는다. 초기 포커스는 팝업 안 첫 tabbable로 가므로 **DOM 순서를 취소 → 실행으로 두면** 덜 파괴적인 쪽이 잡힌다. 포커스 트랩·스크롤 잠금·포털·`aria-modal`은 전부 프리미티브가 맡으므로 직접 구현하지 않는다.
+
+> 딤 클릭으로 닫는 게 맞는 창은 **Dialog**다. 되돌릴 수 없는 확인이 아니라 보기·입력 목적의 창(기록 상세, 등록/수정 폼)은 Dialog를 쓰고 딤 클릭 닫기를 기본으로 둔다. 단 입력 중인 폼은 `disablePointerDismissal`로 막는다 — 거기서는 딤 클릭이 '취소'가 아니라 '작성 중인 내용 폐기'가 되기 때문이다.
+
+- **딤**: `bg-backdrop` + `z-40`. 투명도만 쓰고 **블러를 얹지 않는다**(⑦ 장식 금지). 다크가 더 짙은 이유는 ⑥ elevation과 같다 — 어두운 지면 위에서는 40%로 뒤가 물러나지 않는다.
+- **본체**: `bg-background dark:bg-card`(④ 파생규칙 1 오버레이) + `border-border` + `shadow-elevation-4` + `z-40`. 그림자는 ⑥에 따라 이 하나뿐이라 `ring`을 덧대지 않는다.
+- **반응형 형태**(⑧): `< sm`은 하단에 붙는 **바텀 시트**(`rounded-t-2xl`, 아래에서 올라옴, `pb`에 `env(safe-area-inset-bottom)`), `sm`↑는 **중앙 다이얼로그**(`rounded-2xl`, `sm:max-w-md`, scale 0.96→1). 화면 폭은 `sm:` 브레이크포인트로 가르고 JS로 읽지 않는다 — JS는 값이 확정되기 전 첫 프레임이 그려져 등장 방향이 튄다.
+- **모션**: ⑤ 진입/퇴장 200ms ease-out + `motion-reduce:transition-none`. transition으로 구현할 때 시작·끝 상태는 반드시 `data-[starting-style]` / `data-[ending-style]`로 잡는다 — `data-open`·`data-closed`는 **상태** 속성이라 키프레임(`animate-in`)용이고, 열릴 때 `data-closed`는 한 번도 붙지 않아 전환 없이 최종 위치에 바로 그려진다.
+- **내부**: `p-4 md:p-6`, 블록 간 `gap-4`. 제목은 H3 + `text-title`, 설명은 Small + `text-muted-foreground`(제목↔설명 `gap-1`).
+- **푸터**: 배경·테두리 없는 버튼 줄(`gap-2`, `sm:justify-end`). 지면을 깔면 ①의 미니멀 톤에서 무거워진다. DOM 순서는 **취소 → 실행**이고 `flex-col-reverse`로 좁은 화면에서 실행이 위로 간다 — 덜 파괴적인 쪽을 키보드가 먼저 만나고, 엄지에서 먼 자리에 파괴적 버튼을 둔다.
+- **버튼**: 실행은 `destructive`(⑦ — 파괴적 액션 전용), 취소는 `outline`. 실행 버튼은 **닫기를 겸하지 않는다** — 뮤테이션이 실패하면 창이 열린 채 남아야 에러를 보고 다시 시도할 수 있다.
+- **아이콘 배지를 두지 않는다.** EmptyState와 같은 이유다(④ EmptyState) — 원형 `bg-muted` 배지는 ④에 없는 규격이고 확인 창을 과장한다.
+- **마찰은 잃을 게 있을 때만 준다.** 지울 대상에 딸린 기록이 없으면 확인 없이 실행한다. 띄울 때는 **무엇이 함께 사라지는지 개수를 문장에 싣는다**("독서 기록 12개, 서평 1개가 함께 삭제됩니다") — "정말 삭제할까요?"만으로는 판단할 근거가 없고, 매번 뜨는 확인 창은 곧 읽지 않고 누르는 버튼이 된다.
+
 **예외 — 카카오 로그인 버튼**: ⑦의 "버튼은 블루 계열만" 규칙에서 유일하게 면제된다. 카카오 개발자 가이드가 배경 `#FEE500` · 텍스트 `rgba(0,0,0,.85)`를 요구하는 **서드파티 브랜드 규정**이기 때문이다. 이 예외를 다른 소셜 버튼으로 확장할 때도 같은 근거(공식 브랜드 가이드)가 있어야 한다.
 
 ### 신규 컴포넌트 파생 규칙
@@ -185,7 +227,7 @@ gray100 #F5F5F5 · gray300 #E0E0E0 · gray500 #757575 · gray800 #333333
 2. **테두리·반경** — `border border-border` + 위 Radius 스케일
 3. **그림자** — `shadow-elevation-{1..4}` 중 **하나만**: 카드 1 / 드롭다운·hover 2 / 팝오버·툴팁 3 / 모달 4
 4. **텍스트** — 제목 `text-title`, 본문 `text-foreground`, 메타 `text-muted-foreground`
-5. **강조** — 상태 표시만 Success/Warning/Danger, 나머지는 전부 `primary` 계열
+5. **강조** — 오류·파괴적 액션만 `destructive`, 나머지는 전부 `primary` 계열(②)
 6. **패딩·z-index** — ⑤ 표의 값만. 카드 내부는 `p-4 md:p-6`
 7. 라이트/다크 두 테마 대비를 확인한 뒤 커밋한다
 
@@ -256,7 +298,7 @@ z-index는 아래 6단계만 쓴다. 코드에서는 Tailwind `z-0`~`z-50`이 �
 **Do**
 
 - 색상은 항상 시맨틱 클래스(`bg-primary`, `text-title`)로 참조한다. HEX는 `globals.css`에만 존재한다.
-- Success/Warning/Danger는 아이콘이나 텍스트 라벨과 **함께** 쓴다 (색맹 접근성).
+- `destructive`는 아이콘이나 텍스트 라벨과 **함께** 쓴다 (색맹 접근성). 색 하나로만 "위험"을 말하지 않는다.
 - 스트릭·목표 같은 핵심 지표는 `font-mono` + Stat 스케일로 통일한다.
 - 새 CSS 변수를 `:root`에 추가하면 `.dark`에도 **같은 커밋에서** 추가한다.
 - 아이콘은 Lucide만, stroke-width 2px, 16px(인라인) / 20px(버튼·인풋·EmptyState) / 24px(내비게이션). 색은 `text-muted-foreground` · `text-primary` · 상태색 중에서만.
@@ -271,7 +313,8 @@ z-index는 아래 6단계만 쓴다. 코드에서는 Tailwind `z-0`~`z-50`이 �
 - 그라데이션 배경 금지. 팔레트는 단색 톤으로만 구성한다.
 - 그림자 2개 이상 겹치기 금지 (⑥ 표에서 하나만).
 - `bg-primary` 위에 `text-primary-foreground`가 아닌 텍스트 색 금지 (다크에서 대비가 무너진다).
-- Success/Warning/Danger를 Primary 버튼·내비게이션 활성·배경 장식에 쓰지 않는다. "저장" 버튼은 초록색이 아니라 `bg-primary`이고, 완료 확인 **배지**만 Success다.
+- `destructive`를 오류·파괴적 액션 밖으로 넓히지 않는다. "저장" 버튼은 `bg-primary`이고, 완독·목표 달성처럼 **좋은** 소식에는 애초에 쓸 색이 없다 — 블루 스케일로 표현한다(②).
+- **Success/Warning 토큰을 다시 만들지 않는다.** 한 번 있었는데 어디서도 쓰이지 않아 지웠다(실측: 배지 variant 정의 2줄 외 사용처 0). 초록·노랑이 꼭 필요한 화면이 생기면 그때 이 조항부터 고친다.
 - `bg-primary`·`bg-secondary`를 카드·패널처럼 항상 떠 있는 정적 서피스의 기본 배경에 쓰지 않는다. 버튼·배지처럼 사용자가 조작하는 액션 표면과 `hover:bg-accent` 같은 일시적 피드백에만 쓴다 — 정적 서피스는 `bg-card`/`bg-muted`(뉴트럴 톤)가 맡는다.
 - 배지에 새 색 추가 금지 — `bg-secondary` 또는 상태색 셋 중에서만 고른다.
   단 **배경을 채우는 건 클릭 가능한 배지만**이다. 읽기 전용 표시 배지는 배경 없이
@@ -310,7 +353,7 @@ Tailwind 기본 브레이크포인트를 그대로 쓴다 — `sm` 640(큰 모�
 ```
 bg-background · bg-card · bg-muted          text-title · text-foreground · text-muted-foreground
 bg-primary → hover:bg-primary-hover         disabled:bg-disabled  (opacity 금지)
-border-border · focus:border-ring+ring-3    text-success/warning/destructive (상태 전용)
+border-border · focus:border-ring+ring-3    text-destructive (오류·파괴 전용, 유일한 비블루)
 shadow-elevation-1~4 (하나만)               rounded-lg 버튼 / -xl 카드 / -full 배지
 간격 1·2·4·6·10·16 (4·8·16·24·40·64px)      font-sans 본문 / font-mono 통계
 ```
