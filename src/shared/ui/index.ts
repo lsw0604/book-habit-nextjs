@@ -17,6 +17,7 @@ export * from "./label";
 export * from "./password-input";
 export * from "./popover";
 export * from "./progress";
+export * from "./query-state";
 export * from "./radio-group";
 export * from "./select";
 export * from "./separator";
