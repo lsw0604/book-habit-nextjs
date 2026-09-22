@@ -17,8 +17,9 @@ export interface MyBookReviewService {
   fetchCommentedMyBookReviews: (
     params: MyBookReviewListParamsDTO,
   ) => Promise<ResponsePagination<MyBookReviewListItemDTO>>;
-  /** `myBookId`로 조회한다 — 한줄평 자신의 PK가 아니다(`MY_BOOK_REVIEW.BY_MY_BOOK_ID` 참고). */
-  fetchMyBookReviewDetail: (myBookId: number) => Promise<MyBookReviewDetailDTO>;
+  fetchMyBookReviewByMyBookId: (
+    myBookId: number,
+  ) => Promise<MyBookReviewDetailDTO>;
 }
 
 export const myBookReviewService: MyBookReviewService = {
@@ -37,7 +38,7 @@ export const myBookReviewService: MyBookReviewService = {
       API_ENDPOINTS.MY_BOOK_REVIEW.COMMENTED,
       { params },
     ),
-  fetchMyBookReviewDetail: async (myBookId) =>
+  fetchMyBookReviewByMyBookId: async (myBookId) =>
     await apiClient.get<MyBookReviewDetailDTO>(
       API_ENDPOINTS.MY_BOOK_REVIEW.BY_MY_BOOK_ID(myBookId),
     ),

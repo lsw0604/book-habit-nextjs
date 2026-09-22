@@ -1,4 +1,4 @@
 export * from "./useFetchCommentedMyBookReviews";
 export * from "./useFetchLikedMyBookReviews";
-export * from "./useFetchMyBookReviewDetail";
+export * from "./useFetchMyBookReviewByMyBookId";
 export * from "./useFetchMyBookReviews";
