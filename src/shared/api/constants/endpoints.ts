@@ -40,7 +40,13 @@ export const API_ENDPOINTS = {
     ROOT: "/api/my-book-review",
     LIKED: "/api/my-book-review/liked",
     COMMENTED: "/api/my-book-review/commented",
-    BY_ID: (id: number) => `/api/my-book-review/${id}`,
+    /**
+     * 경로의 `id`는 한줄평 자신의 PK가 아니라 `myBookId`다. MyBook당 한줄평이
+     * 최대 1개라(1:1) 상위 리소스의 식별자로 유일한 자식을 찾는 설계다 —
+     * `MY_BOOK.BY_ISBN`이 ISBN을 키로 쓰는 것과 같은 결. 응답 바디의 `id`
+     * 필드(한줄평 자신의 PK)와는 다른 값이니 혼동하지 않는다.
+     */
+    BY_MY_BOOK_ID: (myBookId: number) => `/api/my-book-review/${myBookId}`,
   },
   /** 생성·삭제 모두 `myBookReviewId`로 대상을 지정한다 (삭제는 쿼리). */
   REVIEW_LIKE: {
